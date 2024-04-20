@@ -92,12 +92,12 @@ export default function Home() {
               <img alt="rayguntv" src={"/RAYGUN_TV_LOGO.png"} />
             </div>
             <div
-              className="z-0 absolute left-1/2 -translate-x-1/2 flex justify-center aspect-[16/9]"
+              className="absolute z-0"
               style={{
-                top: "calc(102/800 * 100%)",
-                height: "calc(250/300 * 100%)",
-                left: "calc(70/200 * 100%)",
-                transform: "translate(-50%)",
+                top: "5%", // Adjust as necessary to fit within your frame
+                left: "4%", // Adjust as necessary to fit within your frame
+                right: "6%", // Adjust as necessary to fit within your frame
+                bottom: "0%", // Adjust as necessary to fit within your frame
               }}
             >
               <video
@@ -105,7 +105,7 @@ export default function Home() {
                 src="https://storage.googleapis.com/childrenstory-bucket/gina_inside_TV.mp4"
                 autoPlay
                 muted={videoMuted}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => console.error("Video error:", e)}
               ></video>
             </div>
