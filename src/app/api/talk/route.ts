@@ -16,8 +16,6 @@ export async function POST(req: Request) {
   const input: Input = {
     driven_audio: audioUrl,
     source_image: imageUrl,
-    ref_eyeblink: eyeblinkUrl,
-    ref_pose: poseUrl,
   };
 
   const output = await replicate.run(
