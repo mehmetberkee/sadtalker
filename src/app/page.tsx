@@ -1,17 +1,96 @@
 "use client";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { UploadFile } from "./lib/actions";
+
 export default function Home() {
   // State for managing video playback key and mute state.
+  const [videoURLs, setVideoURLs] = useState<(string | null)[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string | null>(
+    "https://storage.googleapis.com/childrenstory-bucket/gina_inside_TV2_360.mp4"
+  );
   const [videoKey, setVideoKey] = useState(Date.now());
   const [videoMuted, setVideoMuted] = useState(true);
+  const [imageUrl, setImageUrl] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [eyeblinkUrl, setEyeblinkUrl] = useState("");
+  const [poseUrl, setPoseUrl] = useState("");
 
-  // Use an effect to unmute the video after a delay.
+  useEffect(() => {
+    const fetchData = async function () {
+      const res = await fetch("/api/videoData", {
+        method: "POST",
+      });
+      const body = await res.json();
+      const urls = body.urls;
+      console.log(urls);
+      setVideoURLs(urls);
+    };
+    fetchData();
+  }, []);
+
   useEffect(() => {
     setTimeout(() => {
       setVideoMuted(false);
-    }, 1000); // Unmute after 1 second.
+    }, 1000);
   }, []);
+
+  useEffect(() => {
+    if (isLoading) {
+      setVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
+      setVideoKey(Date.now());
+    }
+  }, [isLoading]);
+  const handleClick = async function () {
+    setIsLoading(true);
+    const res = await fetch("/api/talk", {
+      method: "POST",
+      body: JSON.stringify({
+        audioUrl: audioUrl,
+        imageUrl: imageUrl,
+        poseUrl: poseUrl,
+        eyeblinkUrl: eyeblinkUrl,
+      }),
+    });
+    const response = await res.json();
+    const newUrl = response.url;
+    setIsLoading(false);
+    setVideoUrl(newUrl);
+    setVideoKey(Date.now());
+  };
+
+  const handleFileUpload = async (event: any, type: string) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const uploadSuccess = await UploadFile(formData);
+        if (
+          uploadSuccess &&
+          typeof uploadSuccess === "object" &&
+          uploadSuccess.success
+        ) {
+          console.log("File uploaded successfully: " + uploadSuccess.url);
+          if (type === "image") {
+            setImageUrl(uploadSuccess.url);
+          } else if (type === "audio") {
+            setAudioUrl(uploadSuccess.url);
+          } else if (type === "video") {
+            setEyeblinkUrl(uploadSuccess.url);
+          } else if (type === "pose") {
+            setPoseUrl(uploadSuccess.url);
+          }
+        } else {
+          console.error("Upload failed");
+        }
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+    }
+  };
 
   return (
     <div className="w-full h-screen bg-black">
@@ -24,18 +103,31 @@ export default function Home() {
               width={200}
               height={200}
             />
+
             <p className="text-white text-left">
               Upload your image or videoclip, add your audio, choose face
               enhancer, add your pose and that's it!
             </p>
-            <form className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (audioUrl && imageUrl) {
+                  handleClick();
+                  console.log("submitted");
+                }
+              }}
+              className="space-y-4"
+            >
               <div className="w-[300px]">
                 <label className="block text-sm font-medium text-white">
                   Drop an image file or video.
                 </label>
                 <input
                   type="file"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  onChange={(e) => {
+                    handleFileUpload(e, "image");
+                  }}
                 />
               </div>
 
@@ -46,7 +138,10 @@ export default function Home() {
                 <input
                   type="file"
                   accept="audio/*"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  onChange={(e) => {
+                    handleFileUpload(e, "audio");
+                  }}
                 />
               </div>
 
@@ -68,7 +163,10 @@ export default function Home() {
                 <input
                   type="file"
                   accept="video/*"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  onChange={(e) => {
+                    handleFileUpload(e, "video");
+                  }}
                 />
               </div>
 
@@ -79,9 +177,13 @@ export default function Home() {
                 <input
                   type="file"
                   accept="image/*"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  onChange={(e) => {
+                    handleFileUpload(e, "image");
+                  }}
                 />
               </div>
+              <button className="text-white">Send</button>
             </form>
           </div>
           <div
@@ -94,20 +196,22 @@ export default function Home() {
             <div
               className="absolute z-0"
               style={{
-                top: "5%", // Adjust as necessary to fit within your frame
-                left: "4%", // Adjust as necessary to fit within your frame
-                right: "6%", // Adjust as necessary to fit within your frame
-                bottom: "0%", // Adjust as necessary to fit within your frame
+                top: "5%",
+                left: "4%",
+                right: "20%",
+                bottom: "-7%",
               }}
             >
-              <video
-                key={videoKey}
-                src="https://storage.googleapis.com/childrenstory-bucket/gina_inside_TV.mp4"
-                autoPlay
-                muted={videoMuted}
-                className="w-full h-full object-contain"
-                onError={(e) => console.error("Video error:", e)}
-              ></video>
+              {videoUrl && (
+                <video
+                  key={videoKey}
+                  src={videoUrl}
+                  autoPlay
+                  muted={videoMuted}
+                  className="w-full h-full object-contain"
+                  onError={(e) => console.error("Video error:", e)}
+                ></video>
+              )}
             </div>
           </div>
         </div>
