@@ -16,14 +16,10 @@ export async function POST(req: Request) {
   const input: Input = {
     driven_audio: audioUrl,
     source_image: imageUrl,
+    ref_eyeblink: eyeblinkUrl,
+    ref_pose: poseUrl,
   };
-  if (eyeblinkUrl) {
-    input.ref_eyeblink = eyeblinkUrl;
-  }
 
-  if (poseUrl) {
-    input.ref_pose = poseUrl;
-  }
   const output = await replicate.run(
     "cjwbw/sadtalker:3aa3dac9353cc4d6bd62a8f95957bd844003b401ca4e4a9b33baa574c549d376",
     { input }
