@@ -14,6 +14,7 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [imageObjectUrl, setImageObjectUrl] = useState("");
   const [eyeblinkUrl, setEyeblinkUrl] = useState("");
   const [poseUrl, setPoseUrl] = useState("");
 
@@ -63,6 +64,8 @@ export default function Home() {
   const handleFileUpload = async (event: any, type: string) => {
     const file = event.target.files[0];
     if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setImageObjectUrl(objectUrl);
       const formData = new FormData();
       formData.append("file", file);
 
@@ -93,18 +96,18 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full h-screen bg-black">
-      <div className="max-w-[1200px] mx-auto">
+    <div className="h-screen w-full bg-black">
+      <div className="max-w-[1000px] mx-auto flex flex-col h-screen">
         <div className="flex justify-between">
-          <div className="flex flex-col items-start justify-center p-4">
+          <div className="flex flex-col items-start mt-5 ">
             <Image
               alt="logo"
               src={"/D47G-dashboard-2x-raygun-logo.png"}
-              width={200}
-              height={200}
+              width={100}
+              height={100}
             />
 
-            <p className="text-white text-left">
+            <p className="text-white text-left text-xs">
               Upload your image or videoclip, add your audio, choose face
               enhancer, add your pose and that's it!
             </p>
@@ -119,12 +122,12 @@ export default function Home() {
               className="space-y-4"
             >
               <div className="w-[300px]">
-                <label className="block text-sm font-medium text-white">
+                <label className="block text-xs font-medium text-white">
                   Drop an image file or video.
                 </label>
                 <input
                   type="file"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
                   onChange={(e) => {
                     handleFileUpload(e, "image");
                   }}
@@ -132,13 +135,13 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-sm font-medium text-white">
+                <label className="block text-xs font-medium text-white">
                   Add your audio.
                 </label>
                 <input
                   type="file"
                   accept="audio/*"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
                   onChange={(e) => {
                     handleFileUpload(e, "audio");
                   }}
@@ -146,10 +149,10 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-sm font-medium text-white">
+                <label className="block text-xs font-medium text-white">
                   Choose a face enhancer.
                 </label>
-                <select className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm">
+                <select className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm">
                   <option>Enhancer 1</option>
                   <option>Enhancer 2</option>
                   <option>Enhancer 3</option>
@@ -157,13 +160,13 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-sm font-medium text-white">
+                <label className="block text-xs font-medium text-white">
                   Add your eyeblink video or use default.
                 </label>
                 <input
                   type="file"
                   accept="video/*"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
                   onChange={(e) => {
                     handleFileUpload(e, "video");
                   }}
@@ -171,13 +174,13 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-sm font-medium text-white">
+                <label className="block text-xs font-medium text-white">
                   Add your pose (optional)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
                   onChange={(e) => {
                     handleFileUpload(e, "image");
                   }}
@@ -186,24 +189,34 @@ export default function Home() {
               <button className="text-white">Send</button>
             </form>
           </div>
-          <div
-            className="relative mt-20 z-20"
-            style={{ height: "370px", width: "80%" }}
-          >
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <img alt="rayguntv" src={"/RAYGUN_TV_LOGO.png"} />
+          <div className=" mt-20 z-20">
+            <div>
+              {imageObjectUrl && (
+                <Image
+                  alt="image"
+                  width={300}
+                  height={300}
+                  src={imageObjectUrl}
+                />
+              )}
             </div>
-            <div
-              className="absolute z-0"
-              style={{
-                top: "5%",
-                left: "4%",
-                right: "20%",
-                bottom: "-7%",
-              }}
-            >
-              {videoUrl && (
-                <video
+          </div>
+        </div>
+        <div className="mx-auto">
+          <Image
+            alt="newTv"
+            src={"/NEW_TV_FRAME.png"}
+            width={200}
+            height={100}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/*
+<video
                   key={videoKey}
                   src={videoUrl}
                   autoPlay
@@ -211,11 +224,4 @@ export default function Home() {
                   className="w-full h-full object-contain"
                   onError={(e) => console.error("Video error:", e)}
                 ></video>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+*/
