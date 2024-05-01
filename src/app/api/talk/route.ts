@@ -6,6 +6,7 @@ interface Input {
   ref_pose?: string;
 }
 export async function POST(req: Request) {
+  console.log("started");
   const body = await req.json();
   const audioUrl = body.audioUrl;
   const imageUrl = body.imageUrl;

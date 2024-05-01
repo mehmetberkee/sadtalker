@@ -2,6 +2,17 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { UploadFile } from "./lib/actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Home() {
   // State for managing video playback key and mute state.
@@ -17,7 +28,53 @@ export default function Home() {
   const [imageObjectUrl, setImageObjectUrl] = useState("");
   const [eyeblinkUrl, setEyeblinkUrl] = useState("");
   const [poseUrl, setPoseUrl] = useState("");
+  const [creditCount, setCreditCount] = useState(3);
+  const [fileType, setFileType] = useState("");
+  const [fontSize, setFontSize] = useState(10);
+  const aspectRatio = 1805 / 1247; // Sabit oran
+  const [isCreated, setIsCreated] = useState(false);
+  const [containerHeight, setContainerHeight] = useState(
+    window.innerHeight * 0.3
+  );
+  const [containerWidth, setContainerWidth] = useState(
+    window.innerHeight * 0.3 * aspectRatio
+  );
+  const [showCreditForm, setShowCreditForm] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const aspectRatio = 1805 / 1247;
+      const newHeight = window.innerHeight * 0.3;
+      setContainerHeight(newHeight);
+      setContainerWidth(newHeight * aspectRatio);
+
+      function handleResize() {
+        const updatedHeight = window.innerHeight * 0.2;
+        setContainerHeight(updatedHeight);
+        setContainerWidth(updatedHeight * aspectRatio);
+      }
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    function adjustFontSize() {
+      const newFontSize = window.innerHeight / 100;
+      setFontSize(newFontSize);
+    }
+
+    window.addEventListener("resize", adjustFontSize);
+    adjustFontSize(); // İlk yüklemede font boyutunu ayarla
+
+    return () => {
+      window.removeEventListener("resize", adjustFontSize);
+    };
+  }, [window.innerHeight]);
   useEffect(() => {
     const fetchData = async function () {
       const res = await fetch("/api/videoData", {
@@ -44,21 +101,24 @@ export default function Home() {
     }
   }, [isLoading]);
   const handleClick = async function () {
-    setIsLoading(true);
-    const res = await fetch("/api/talk", {
-      method: "POST",
-      body: JSON.stringify({
-        audioUrl: audioUrl,
-        imageUrl: imageUrl,
-        poseUrl: poseUrl,
-        eyeblinkUrl: eyeblinkUrl,
-      }),
-    });
-    const response = await res.json();
-    const newUrl = response.url;
-    setIsLoading(false);
-    setVideoUrl(newUrl);
-    setVideoKey(Date.now());
+    if (creditCount > 0) {
+      setIsLoading(true);
+      const res = await fetch("/api/talk", {
+        method: "POST",
+        body: JSON.stringify({
+          audioUrl: audioUrl,
+          imageUrl: imageUrl,
+          poseUrl: poseUrl,
+          eyeblinkUrl: eyeblinkUrl,
+        }),
+      });
+      const response = await res.json();
+      const newUrl = response.url;
+      setIsLoading(false);
+      setVideoUrl(newUrl);
+      setVideoKey(Date.now());
+      setIsCreated(true);
+    }
   };
 
   const handleFileUpload = async (event: any, type: string) => {
@@ -66,6 +126,7 @@ export default function Home() {
     if (file) {
       const objectUrl = URL.createObjectURL(file);
       setImageObjectUrl(objectUrl);
+      setFileType(file.type.startsWith("image") ? "image" : "video");
       const formData = new FormData();
       formData.append("file", file);
 
@@ -95,9 +156,32 @@ export default function Home() {
     }
   };
 
+  const handleDownload = async () => {
+    // This assumes `videoUrl` is the URL to the video file.
+    if (!videoUrl) return;
+
+    try {
+      const response = await fetch(videoUrl);
+      const blob = await response.blob(); // Convert the response to a Blob.
+      const downloadUrl = window.URL.createObjectURL(blob); // Create a URL for the Blob.
+      const a = document.createElement("a"); // Create a <a> element.
+      a.href = downloadUrl;
+      a.download = "downloadedVideo.mp4"; // Set the download filename.
+      document.body.appendChild(a); // Append the <a> to the document.
+      a.click(); // Programmatically click the <a> to trigger the download.
+      a.remove(); // Clean up.
+      window.URL.revokeObjectURL(downloadUrl); // Revoke the blob URL.
+    } catch (error) {
+      console.error("Failed to download the file:", error);
+    }
+  };
+
+  const handleToken = function () {
+    setCreditCount(creditCount + 1);
+  };
   return (
     <div className="h-screen w-full bg-black">
-      <div className="max-w-[1000px] mx-auto flex flex-col h-screen">
+      <div className="max-w-[1000px] mx-auto flex flex-col justify-between h-screen">
         <div className="flex justify-between">
           <div className="flex flex-col items-start mt-5 ">
             <Image
@@ -107,7 +191,10 @@ export default function Home() {
               height={100}
             />
 
-            <p className="text-white text-left text-xs">
+            <p
+              className={`text-white text-left`}
+              style={{ fontSize: `${fontSize}px` }}
+            >
               Upload your image or videoclip, add your audio, choose face
               enhancer, add your pose and that's it!
             </p>
@@ -122,12 +209,17 @@ export default function Home() {
               className="space-y-4"
             >
               <div className="w-[300px]">
-                <label className="block text-xs font-medium text-white">
+                <label
+                  className={`block font-medium text-white`}
+                  style={{ fontSize: `${fontSize}px` }}
+                >
                   Drop an image file or video.
                 </label>
                 <input
                   type="file"
-                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  accept="image/*,video/*"
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "image");
                   }}
@@ -135,13 +227,17 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-xs font-medium text-white">
+                <label
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`block font-medium text-white`}
+                >
                   Add your audio.
                 </label>
                 <input
                   type="file"
                   accept="audio/*"
-                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "audio");
                   }}
@@ -149,24 +245,17 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-xs font-medium text-white">
-                  Choose a face enhancer.
-                </label>
-                <select className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm">
-                  <option>Enhancer 1</option>
-                  <option>Enhancer 2</option>
-                  <option>Enhancer 3</option>
-                </select>
-              </div>
-
-              <div className="w-[300px]">
-                <label className="block text-xs font-medium text-white">
+                <label
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`block font-medium text-white`}
+                >
                   Add your eyeblink video or use default.
                 </label>
                 <input
                   type="file"
                   accept="video/*"
-                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "video");
                   }}
@@ -174,41 +263,127 @@ export default function Home() {
               </div>
 
               <div className="w-[300px]">
-                <label className="block text-xs font-medium text-white">
+                <label
+                  className={`block text-[10px] font-medium text-white`}
+                  style={{ fontSize: `${fontSize}px` }}
+                >
                   Add your pose (optional)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  className="mt-1 p-2 text-xs w-full border border-gray-300 rounded-md shadow-sm text-white"
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "image");
                   }}
                 />
               </div>
-              <button className="text-white">Send</button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleToken}
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`text-white border-2 font-bold border-white px-2 py-1`}
+                >
+                  ADD TOKEN
+                </button>
+                <div className="px-2 py-1 border-2 border-white text-white">
+                  {creditCount < 10 ? `0${creditCount}` : creditCount}
+                </div>
+                <button
+                  onClick={handleClick}
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`text-white border-2 font-bold border-white px-2 py-1`}
+                >
+                  SEND
+                </button>
+              </div>
             </form>
           </div>
           <div className=" mt-20 z-20">
             <div>
-              {imageObjectUrl && (
-                <Image
-                  alt="image"
-                  width={300}
-                  height={300}
-                  src={imageObjectUrl}
-                />
+              {imageObjectUrl && !isCreated && (
+                <div className="flex flex-col gap-5 items-center">
+                  {fileType === "image" ? (
+                    <Image
+                      alt="Uploaded image"
+                      src={imageObjectUrl}
+                      width={300}
+                      height={300}
+                    />
+                  ) : (
+                    <video
+                      src={imageObjectUrl}
+                      width="300"
+                      height="300"
+                      controls
+                    ></video>
+                  )}
+                </div>
+              )}
+
+              {isCreated && videoUrl && (
+                <div className="flex flex-col gap-5 items-center">
+                  <video
+                    src={videoUrl}
+                    width="300"
+                    height="300"
+                    controls
+                  ></video>
+
+                  <a
+                    href="#"
+                    onClick={handleDownload} // Use onClick handler to trigger the download function
+                    className="text-white border-2 text-sm font-bold border-white px-2 py-1"
+                    style={{ textDecoration: "none" }}
+                  >
+                    DOWNLOAD
+                  </a>
+                </div>
               )}
             </div>
           </div>
         </div>
-        <div className="mx-auto">
-          <Image
-            alt="newTv"
-            src={"/NEW_TV_FRAME.png"}
-            width={200}
-            height={100}
-          />
+        <div className="w-[600px] mx-auto flex flex-col items-center justify-center gap-2 mb-10">
+          <p className="text-white text-xs">
+            While our studio puts on the razzle and dazzle for your creation,
+            sit back and watch a complimentary short film brought to you by
+            RAYGUN.
+          </p>
+          <div
+            className="mx-auto relative"
+            style={{
+              width: `${containerWidth}px`,
+              height: `${containerHeight}px`,
+            }}
+          >
+            {isLoading && videoUrl ? (
+              <video
+                src={videoUrl}
+                key={videoKey}
+                muted={false}
+                className="absolute top-4 left-4 z-10 w-[70%] h-auto max-h-full"
+                autoPlay
+                playsInline
+                preload="none"
+              >
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img
+                className="absolute top-4 left-4 z-10 w-[70%] h-auto max-h-full"
+                src="/text_slide.png"
+                alt="text slide"
+              />
+            )}
+
+            <img
+              className="absolute top-0 left-0 z-20 w-full h-full"
+              src="/NEW_TV_FRAME.png"
+              alt="newTv"
+            />
+          </div>
         </div>
       </div>
     </div>
