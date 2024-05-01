@@ -34,10 +34,10 @@ export default function Home() {
   const aspectRatio = 1805 / 1247; // Sabit oran
   const [isCreated, setIsCreated] = useState(false);
   const [containerHeight, setContainerHeight] = useState(
-    window.innerHeight * 0.3
+    window?.innerHeight * 0.3
   );
   const [containerWidth, setContainerWidth] = useState(
-    window.innerHeight * 0.3 * aspectRatio
+    window?.innerHeight * 0.3 * aspectRatio
   );
   const [showCreditForm, setShowCreditForm] = useState(false);
 
@@ -48,11 +48,11 @@ export default function Home() {
       setContainerHeight(newHeight);
       setContainerWidth(newHeight * aspectRatio);
 
-      function handleResize() {
+      const handleResize = function () {
         const updatedHeight = window.innerHeight * 0.2;
         setContainerHeight(updatedHeight);
         setContainerWidth(updatedHeight * aspectRatio);
-      }
+      };
 
       window.addEventListener("resize", handleResize);
 
@@ -69,7 +69,7 @@ export default function Home() {
     }
 
     window.addEventListener("resize", adjustFontSize);
-    adjustFontSize(); // İlk yüklemede font boyutunu ayarla
+    adjustFontSize();
 
     return () => {
       window.removeEventListener("resize", adjustFontSize);
@@ -196,7 +196,7 @@ export default function Home() {
               style={{ fontSize: `${fontSize}px` }}
             >
               Upload your image or videoclip, add your audio, choose face
-              enhancer, add your pose and that's it!
+              enhancer, add your pose and that&apos;s it!
             </p>
             <form
               onSubmit={(e) => {
