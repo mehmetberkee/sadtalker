@@ -121,7 +121,7 @@ export default function Home() {
     const file = event.target.files[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
-      setImageObjectUrl(objectUrl);
+      type === "image" && setImageObjectUrl(objectUrl);
       setFileType(file.type.startsWith("image") ? "image" : "video");
       const formData = new FormData();
       formData.append("file", file);
