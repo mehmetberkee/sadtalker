@@ -33,12 +33,8 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(10);
   const aspectRatio = 1805 / 1247; // Sabit oran
   const [isCreated, setIsCreated] = useState(false);
-  const [containerHeight, setContainerHeight] = useState(
-    window?.innerHeight * 0.3
-  );
-  const [containerWidth, setContainerWidth] = useState(
-    window?.innerHeight * 0.3 * aspectRatio
-  );
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [showCreditForm, setShowCreditForm] = useState(false);
 
   useEffect(() => {
