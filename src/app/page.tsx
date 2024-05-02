@@ -33,6 +33,7 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(10);
   const aspectRatio = 1805 / 1247; // Sabit oran
   const [isCreated, setIsCreated] = useState(false);
+  const [objectType, setObjectType] = useState("image");
   const [containerHeight, setContainerHeight] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const [showCreditForm, setShowCreditForm] = useState(false);
@@ -121,7 +122,9 @@ export default function Home() {
     const file = event.target.files[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
-      type === "image" && setImageObjectUrl(objectUrl);
+      if (type === "image") {
+        setImageObjectUrl(objectUrl);
+      }
       setFileType(file.type.startsWith("image") ? "image" : "video");
       const formData = new FormData();
       formData.append("file", file);
@@ -178,8 +181,8 @@ export default function Home() {
   return (
     <div className="h-screen w-full bg-black">
       <div className="max-w-[1000px] mx-auto flex flex-col justify-between h-screen">
-        <div className="flex justify-between">
-          <div className="flex flex-col items-start mt-5 ">
+        <div className="flex flex-1">
+          <div className="flex-1 flex-col items-start mt-5 ">
             <Image
               alt="logo"
               src={"/D47G-dashboard-2x-raygun-logo.png"}
@@ -296,16 +299,15 @@ export default function Home() {
               </div>
             </form>
           </div>
-          <div className=" mt-20 z-20">
+          <div className="flex flex-1 items-center justify-center z-20 mx-20 my-20 w-full">
             <div>
               {imageObjectUrl && !isCreated && (
                 <div className="flex flex-col gap-5 items-center">
-                  {fileType === "image" ? (
-                    <Image
+                  {objectType === "image" && imageObjectUrl ? (
+                    <img
                       alt="Uploaded image"
                       src={imageObjectUrl}
-                      width={300}
-                      height={300}
+                      className="h-full"
                     />
                   ) : (
                     <video
@@ -340,45 +342,56 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="w-[600px] mx-auto flex flex-col items-center justify-center gap-2 mb-10">
-          <p className="text-white text-xs">
-            While our studio puts on the razzle and dazzle for your creation,
-            sit back and watch a complimentary short film brought to you by
-            RAYGUN.
-          </p>
-          <div
-            className="mx-auto relative"
-            style={{
-              width: `${containerWidth}px`,
-              height: `${containerHeight}px`,
-            }}
-          >
-            {isLoading && videoUrl ? (
-              <video
-                src={videoUrl}
-                key={videoKey}
-                muted={false}
-                className="absolute top-4 left-4 z-10 w-[70%] h-auto max-h-full"
-                autoPlay
-                playsInline
-                preload="none"
+        <div className="w-full mx-auto flex-1 flex-col items-center justify-center gap-2 mb-10">
+          <div className="flex w-full items-center justify-center h-full">
+            <div className="flex-1" style={{ flexBasis: "25%" }}>
+              {" "}
+              {/* Sol boşluk */}
+              {/* İçerik (boş) */}
+            </div>
+            <div style={{ flexBasis: "50%" }}>
+              {" "}
+              {/* Video bölümü */}
+              <p
+                className={`text-white text-center`}
+                style={{ fontSize: `${fontSize * 1.5}px` }}
               >
-                <source src={videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            ) : (
-              <img
-                className="absolute top-4 left-4 z-10 w-[70%] h-auto max-h-full"
-                src="/text_slide.png"
-                alt="text slide"
-              />
-            )}
-
-            <img
-              className="absolute top-0 left-0 z-20 w-full h-full"
-              src="/NEW_TV_FRAME.png"
-              alt="newTv"
-            />
+                Upload your image or videoclip, add your audio, choose face
+                enhancer, add your pose and that&apos;s it!
+              </p>
+              <div className="relative">
+                {isLoading && videoUrl ? (
+                  <video
+                    src={videoUrl}
+                    key={videoKey}
+                    muted={false}
+                    className="absolute top-10 left-8 w-[70%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
+                    autoPlay
+                    playsInline
+                    preload="none"
+                  >
+                    <source src={videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <img
+                    className="absolute top-10 left-8 w-[70%] h-[80%]" // img'yi div'in tamamını kaplayacak şekilde ayarlar
+                    src="/text_slide.png"
+                    alt="text slide"
+                  />
+                )}
+                <img
+                  className="relative w-full h-full" // Bu imaj da div'in tamamını kaplayacak şekilde pozisyonlandırılır
+                  src="/NEW_TV_FRAME.png"
+                  alt="newTv"
+                />
+              </div>
+            </div>
+            <div className="flex-1" style={{ flexBasis: "25%" }}>
+              {" "}
+              {/* Sağ boşluk */}
+              {/* İçerik (boş) */}
+            </div>
           </div>
         </div>
       </div>
