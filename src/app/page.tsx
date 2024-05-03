@@ -38,7 +38,7 @@ export default function Home() {
   const [waitingVideoUrl, setWaitingVideoUrl] = useState<string | null>("");
   const [gender, setGender] = useState("");
 
-  const audioInputRef = useRef(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const aspectRatio = 1805 / 1247;
