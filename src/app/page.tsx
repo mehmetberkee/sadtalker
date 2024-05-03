@@ -3,23 +3,19 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { UploadFile } from "./lib/actions";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Home() {
   // State for managing video playback key and mute state.
   const [videoURLs, setVideoURLs] = useState<(string | null)[]>([]);
-  const [videoUrl, setVideoUrl] = useState<string | null>(
-    "https://storage.googleapis.com/childrenstory-bucket/gina_inside_TV2_360.mp4"
-  );
+  const [videoUrl, setVideoUrl] = useState<string | null>("");
   const [videoKey, setVideoKey] = useState(Date.now());
   const [videoMuted, setVideoMuted] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
@@ -37,6 +33,9 @@ export default function Home() {
   const [containerHeight, setContainerHeight] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const [showCreditForm, setShowCreditForm] = useState(false);
+  const [inputText, setInputText] = useState("");
+  const [waitingVideoUrl, setWaitingVideoUrl] = useState<string | null>("");
+  const [gender, setGender] = useState("female");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -93,28 +92,59 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoading) {
-      setVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
+      setWaitingVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
       setVideoKey(Date.now());
     }
   }, [isLoading]);
+
   const handleClick = async function () {
+    setIsCreated(false);
     if (creditCount > 0) {
-      setIsLoading(true);
-      const res = await fetch("/api/talk", {
-        method: "POST",
-        body: JSON.stringify({
-          audioUrl: audioUrl,
-          imageUrl: imageUrl,
-          poseUrl: poseUrl,
-          eyeblinkUrl: eyeblinkUrl,
-        }),
-      });
-      const response = await res.json();
-      const newUrl = response.url;
-      setIsLoading(false);
-      setVideoUrl(newUrl);
-      setVideoKey(Date.now());
-      setIsCreated(true);
+      if (inputText) {
+        setIsLoading(true);
+        const audioRes = await fetch("/api/audio", {
+          method: "POST",
+          body: JSON.stringify({
+            text: inputText,
+            gender: gender,
+          }),
+        });
+        const audioJson = await audioRes.json();
+        const audio = await audioJson.url;
+
+        const res = await fetch("/api/talk", {
+          method: "POST",
+          body: JSON.stringify({
+            audioUrl: audio,
+            imageUrl: imageUrl,
+            poseUrl: poseUrl,
+            eyeblinkUrl: eyeblinkUrl,
+          }),
+        });
+        const response = await res.json();
+        const newUrl = response.url;
+        setIsLoading(false);
+        setVideoUrl(newUrl);
+        setVideoKey(Date.now());
+        setIsCreated(true);
+      } else {
+        setIsLoading(true);
+        const res = await fetch("/api/talk", {
+          method: "POST",
+          body: JSON.stringify({
+            audioUrl: audioUrl,
+            imageUrl: imageUrl,
+            poseUrl: poseUrl,
+            eyeblinkUrl: eyeblinkUrl,
+          }),
+        });
+        const response = await res.json();
+        const newUrl = response.url;
+        setIsLoading(false);
+        setVideoUrl(newUrl);
+        setVideoKey(Date.now());
+        setIsCreated(true);
+      }
     }
   };
 
@@ -156,7 +186,6 @@ export default function Home() {
   };
 
   const handleDownload = async () => {
-    // This assumes `videoUrl` is the URL to the video file.
     if (!videoUrl) return;
 
     try {
@@ -179,7 +208,7 @@ export default function Home() {
     setCreditCount(creditCount + 1);
   };
   return (
-    <div className="h-screen w-full bg-black">
+    <div className="h-screen w-full bg-black overflow-x-hidden">
       <div className="max-w-[1000px] mx-auto flex flex-col justify-between h-screen">
         <div className="flex flex-1">
           <div className="flex-1 flex-col items-start mt-5 ">
@@ -191,8 +220,8 @@ export default function Home() {
             />
 
             <p
-              className={`text-white text-left`}
-              style={{ fontSize: `${fontSize}px` }}
+              className={`text-white text-left mb-3`}
+              style={{ fontSize: `${fontSize * 1.5}px` }}
             >
               Upload your image or videoclip, add your audio, choose face
               enhancer, add your pose and that&apos;s it!
@@ -243,6 +272,42 @@ export default function Home() {
                 />
               </div>
 
+              <div className="w-[300px]">
+                <label
+                  style={{ fontSize: `${fontSize}px` }}
+                  className={`block font-medium text-white`}
+                >
+                  OR write your script and choose a voice for your audio.
+                </label>
+                <Textarea
+                  value={inputText}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                  }}
+                  className="bg-black resize-none text-xs text-white"
+                />
+                <Select
+                  value={gender}
+                  onValueChange={(value) => {
+                    console.log(value);
+                    setGender(value);
+                  }}
+                >
+                  <SelectTrigger
+                    className={"w-[180px] bg-black text-white text-xs mt-3"}
+                  >
+                    <SelectValue placeholder="Select a voice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem className="bg-black text-white" value="male">
+                      Male
+                    </SelectItem>
+                    <SelectItem className="bg-black text-white" value="female">
+                      Female
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="w-[300px]">
                 <label
                   style={{ fontSize: `${fontSize}px` }}
@@ -319,8 +384,7 @@ export default function Home() {
                   )}
                 </div>
               )}
-
-              {isCreated && videoUrl && (
+              {videoUrl && isCreated && (
                 <div className="flex flex-col gap-5 items-center">
                   <video
                     src={videoUrl}
@@ -328,15 +392,24 @@ export default function Home() {
                     height="300"
                     controls
                   ></video>
-
-                  <a
-                    href="#"
-                    onClick={handleDownload} // Use onClick handler to trigger the download function
-                    className="text-white border-2 text-sm font-bold border-white px-2 py-1"
-                    style={{ textDecoration: "none" }}
-                  >
-                    DOWNLOAD
-                  </a>
+                </div>
+              )}
+              {imageObjectUrl && (
+                <div className="flex flex-col gap-5 items-center">
+                  <button className="mt-5" disabled={videoUrl ? false : true}>
+                    <a
+                      href="#"
+                      onClick={handleDownload}
+                      className={`text-sm font-bold  ${
+                        videoUrl
+                          ? "text-white border-2 border-white"
+                          : "text-gray-600 border-2 border-gray-600"
+                      } px-2 py-1`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      DOWNLOAD
+                    </a>
+                  </button>
                 </div>
               )}
             </div>
@@ -344,53 +417,45 @@ export default function Home() {
         </div>
         <div className="w-full mx-auto flex-1 flex-col items-center justify-center gap-2 mb-10">
           <div className="flex w-full items-center justify-center h-full">
-            <div className="flex-1" style={{ flexBasis: "25%" }}>
-              {" "}
-              {/* Sol boşluk */}
-              {/* İçerik (boş) */}
-            </div>
-            <div style={{ flexBasis: "50%" }}>
-              {" "}
-              {/* Video bölümü */}
+            <div className="flex-1 mr-10" style={{ flexBasis: "40%" }}>
               <p
                 className={`text-white text-center`}
-                style={{ fontSize: `${fontSize * 1.5}px` }}
+                style={{ fontSize: `${fontSize * 2}px` }}
               >
-                Upload your image or videoclip, add your audio, choose face
-                enhancer, add your pose and that&apos;s it!
+                Your animation is in progress. Sit back, relax and enjoy the
+                show.
               </p>
+            </div>
+            <div style={{ flexBasis: "60%" }}>
+              {" "}
+              {/* Video bölümü */}
               <div className="relative">
-                {isLoading && videoUrl ? (
+                {isLoading && waitingVideoUrl ? (
                   <video
-                    src={videoUrl}
+                    src={waitingVideoUrl}
                     key={videoKey}
                     muted={false}
-                    className="absolute top-10 left-8 w-[70%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
+                    className="absolute top-10 left-8 w-[60%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
                     autoPlay
                     playsInline
                     preload="none"
                   >
-                    <source src={videoUrl} type="video/mp4" />
+                    <source src={waitingVideoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 ) : (
                   <img
-                    className="absolute top-10 left-8 w-[70%] h-[80%]" // img'yi div'in tamamını kaplayacak şekilde ayarlar
+                    className="absolute top-10 left-8 w-[60%] h-[80%]" // img'yi div'in tamamını kaplayacak şekilde ayarlar
                     src="/text_slide.png"
                     alt="text slide"
                   />
                 )}
                 <img
-                  className="relative w-full h-full" // Bu imaj da div'in tamamını kaplayacak şekilde pozisyonlandırılır
+                  className="relative w-[90%] h-[90%]" // Bu imaj da div'in tamamını kaplayacak şekilde pozisyonlandırılır
                   src="/NEW_TV_FRAME.png"
                   alt="newTv"
                 />
               </div>
-            </div>
-            <div className="flex-1" style={{ flexBasis: "25%" }}>
-              {" "}
-              {/* Sağ boşluk */}
-              {/* İçerik (boş) */}
             </div>
           </div>
         </div>
