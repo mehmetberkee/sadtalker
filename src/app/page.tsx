@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UploadFile } from "./lib/actions";
 import {
   Select,
@@ -20,6 +20,7 @@ export default function Home() {
   const [videoMuted, setVideoMuted] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imageObjectUrl, setImageObjectUrl] = useState("");
   const [eyeblinkUrl, setEyeblinkUrl] = useState("");
@@ -35,8 +36,9 @@ export default function Home() {
   const [showCreditForm, setShowCreditForm] = useState(false);
   const [inputText, setInputText] = useState("");
   const [waitingVideoUrl, setWaitingVideoUrl] = useState<string | null>("");
-  const [gender, setGender] = useState("female");
+  const [gender, setGender] = useState("");
 
+  const audioInputRef = useRef(null);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const aspectRatio = 1805 / 1247;
@@ -90,6 +92,10 @@ export default function Home() {
     }, 1000);
   }, []);
 
+  useEffect(() => {
+    console.log("eyeblink:");
+    console.log(eyeblinkUrl);
+  });
   useEffect(() => {
     if (isLoading) {
       setWaitingVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
@@ -149,6 +155,7 @@ export default function Home() {
   };
 
   const handleFileUpload = async (event: any, type: string) => {
+    console.log("handle upload");
     const file = event.target.files[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
@@ -160,7 +167,10 @@ export default function Home() {
       formData.append("file", file);
 
       try {
+        console.log("lets try");
         const uploadSuccess = await UploadFile(formData);
+        console.log("upload succes");
+        console.log(uploadSuccess);
         if (
           uploadSuccess &&
           typeof uploadSuccess === "object" &&
@@ -170,6 +180,7 @@ export default function Home() {
           if (type === "image") {
             setImageUrl(uploadSuccess.url);
           } else if (type === "audio") {
+            setAudioFile(file);
             setAudioUrl(uploadSuccess.url);
           } else if (type === "video") {
             setEyeblinkUrl(uploadSuccess.url);
@@ -182,6 +193,16 @@ export default function Home() {
       } catch (error) {
         console.error("Error uploading file:", error);
       }
+    }
+  };
+
+  const clearAudio = () => {
+    URL.revokeObjectURL(audioUrl);
+    setAudioFile(null);
+    setAudioUrl("");
+
+    if (audioInputRef.current) {
+      audioInputRef.current.value = "";
     }
   };
 
@@ -262,6 +283,7 @@ export default function Home() {
                   Add your audio.
                 </label>
                 <input
+                  ref={audioInputRef}
                   type="file"
                   accept="audio/*"
                   style={{ fontSize: `${fontSize}px` }}
@@ -270,6 +292,15 @@ export default function Home() {
                     handleFileUpload(e, "audio");
                   }}
                 />
+                {audioFile && (
+                  <button
+                    style={{ fontSize: `${fontSize}px` }}
+                    className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
+                    onClick={clearAudio}
+                  >
+                    Clear Audio
+                  </button>
+                )}
               </div>
 
               <div className="w-[300px]">
@@ -299,11 +330,41 @@ export default function Home() {
                     <SelectValue placeholder="Select a voice" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem className="bg-black text-white" value="male">
-                      Male
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Studio-O"
+                    >
+                      Mary
                     </SelectItem>
-                    <SelectItem className="bg-black text-white" value="female">
-                      Female
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Wavenet-G"
+                    >
+                      Veronica
+                    </SelectItem>
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Wavenet-H"
+                    >
+                      Hannah
+                    </SelectItem>
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Studio-Q"
+                    >
+                      John
+                    </SelectItem>
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Wavenet-B"
+                    >
+                      Matt
+                    </SelectItem>
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Wavenet-J"
+                    >
+                      Luke
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -347,7 +408,7 @@ export default function Home() {
                 <button
                   onClick={handleToken}
                   style={{ fontSize: `${fontSize}px` }}
-                  className={`text-white border-2 font-bold border-white px-2 py-1`}
+                  className={`text-white border-2 font-bold border-[#c230ff] px-2 py-1`}
                 >
                   ADD TOKEN
                 </button>
@@ -357,7 +418,7 @@ export default function Home() {
                 <button
                   onClick={handleClick}
                   style={{ fontSize: `${fontSize}px` }}
-                  className={`text-white border-2 font-bold border-white px-2 py-1`}
+                  className={`text-white border-2 font-bold border-[#c230ff] px-2 py-1`}
                 >
                   SEND
                 </button>
@@ -402,7 +463,7 @@ export default function Home() {
                       onClick={handleDownload}
                       className={`text-sm font-bold  ${
                         videoUrl
-                          ? "text-white border-2 border-white"
+                          ? "text-white border-2 border-[#c230ff]"
                           : "text-gray-600 border-2 border-gray-600"
                       } px-2 py-1`}
                       style={{ textDecoration: "none" }}
@@ -419,7 +480,7 @@ export default function Home() {
           <div className="flex w-full items-center justify-center h-full">
             <div className="flex-1 mr-10" style={{ flexBasis: "40%" }}>
               <p
-                className={`text-white text-center`}
+                className={`text-white text-left`}
                 style={{ fontSize: `${fontSize * 2}px` }}
               >
                 Your animation is in progress. Sit back, relax and enjoy the
@@ -452,7 +513,7 @@ export default function Home() {
                 )}
                 <img
                   className="relative w-[90%] h-[90%]" // Bu imaj da div'in tamamını kaplayacak şekilde pozisyonlandırılır
-                  src="/NEW_TV_FRAME.png"
+                  src="/NEW_TV_FRAME_FIXEDGE2.png"
                   alt="newTv"
                 />
               </div>
