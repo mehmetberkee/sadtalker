@@ -15,9 +15,8 @@ export async function POST(req: Request) {
   const request = {
     input: { text: text },
     voice: {
-      languageCode: gender === "female" ? "en-US" : "en-US",
-      name: gender === "female" ? "en-US-Standard-F" : "en-US-Casual-K",
-      ssmlGender: gender === "female" ? "FEMALE" : "MALE",
+      languageCode: "en-US",
+      name: gender,
     },
     audioConfig: { audioEncoding: "MP3" },
   };
