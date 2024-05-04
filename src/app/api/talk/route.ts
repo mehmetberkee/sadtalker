@@ -16,17 +16,20 @@ export async function POST(req: Request) {
   const input: Input = {
     driven_audio: audioUrl,
     source_image: imageUrl,
-
     ...(poseUrl ? { ref_pose: poseUrl } : {}),
+    ...(eyeblinkUrl ? { ref_eyeblink: eyeblinkUrl } : {}),
   };
 
   console.log(input);
-  const output = await replicate.run(
-    "cjwbw/sadtalker:3aa3dac9353cc4d6bd62a8f95957bd844003b401ca4e4a9b33baa574c549d376",
-    { input }
-  );
-
-  console.log("output", output);
-
-  return new Response(JSON.stringify({ url: output }));
+  try {
+    const output = await replicate.run(
+      "cjwbw/sadtalker:3aa3dac9353cc4d6bd62a8f95957bd844003b401ca4e4a9b33baa574c549d376",
+      { input }
+    );
+    console.log("output", output);
+    return new Response(JSON.stringify({ url: output }));
+  } catch (error) {
+    console.log("error", error);
+    return new Response(JSON.stringify({ url: "error" }), { status: 500 });
+  }
 }

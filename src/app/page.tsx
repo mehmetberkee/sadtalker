@@ -9,6 +9,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import { Textarea } from "@/components/ui/textarea";
 
@@ -37,8 +49,17 @@ export default function Home() {
   const [inputText, setInputText] = useState("");
   const [waitingVideoUrl, setWaitingVideoUrl] = useState<string | null>("");
   const [gender, setGender] = useState("");
-
+  const [showAlert, setShowAlert] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (imageUrl && (inputText || audioUrl)) {
+      setIsUploaded(true);
+    } else {
+      setIsUploaded(false);
+    }
+  }, [imageUrl, inputText, audioUrl]);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const aspectRatio = 1805 / 1247;
@@ -129,10 +150,14 @@ export default function Home() {
         });
         const response = await res.json();
         const newUrl = response.url;
-        setIsLoading(false);
-        setVideoUrl(newUrl);
-        setVideoKey(Date.now());
-        setIsCreated(true);
+        if (newUrl === "error") {
+          setIsLoading(false);
+          setShowAlert(true);
+        } else {
+          setVideoUrl(newUrl);
+          setVideoKey(Date.now());
+          setIsCreated(true);
+        }
       } else {
         setIsLoading(true);
         const res = await fetch("/api/talk", {
@@ -156,6 +181,8 @@ export default function Home() {
 
   const handleFileUpload = async (event: any, type: string) => {
     console.log("handle upload");
+
+    setIsUploaded(false);
     const file = event.target.files[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
@@ -177,6 +204,7 @@ export default function Home() {
           uploadSuccess.success
         ) {
           console.log("File uploaded successfully: " + uploadSuccess.url);
+          setIsUploaded(true);
           if (type === "image") {
             setImageUrl(uploadSuccess.url);
           } else if (type === "audio") {
@@ -230,6 +258,18 @@ export default function Home() {
   };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">
+      <AlertDialog open={showAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Error</AlertDialogTitle>
+            <AlertDialogDescription>an error occurred.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button onClick={() => setShowAlert(false)}>Cancel</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="max-w-[800px] mx-auto flex flex-col justify-between h-screen">
         <div className="flex flex-1">
           <div className="flex-1 flex-col items-start mt-5 ">
@@ -430,7 +470,12 @@ export default function Home() {
                 <button
                   onClick={handleClick}
                   style={{ fontSize: `${fontSize * 1.3}px` }}
-                  className={`text-[#c230ff] border-2 font-bold border-[#c230ff] px-2 py-1`}
+                  disabled={!isUploaded}
+                  className={`${
+                    isUploaded ? "text-[#c230ff]" : "text-gray-600"
+                  }  border-2 font-bold ${
+                    isUploaded ? "border-[#c230ff]" : "border-gray-600"
+                  }  px-2 py-1`}
                 >
                   SEND
                 </button>
