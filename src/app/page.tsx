@@ -22,7 +22,7 @@ export default function Home() {
   const [audioUrl, setAudioUrl] = useState("");
   const [audioFile, setAudioFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [imageObjectUrl, setImageObjectUrl] = useState("");
+  const [imageObjectUrl, setImageObjectUrl] = useState("/magichat.png");
   const [eyeblinkUrl, setEyeblinkUrl] = useState("");
   const [poseUrl, setPoseUrl] = useState("");
   const [creditCount, setCreditCount] = useState(3);
@@ -230,7 +230,7 @@ export default function Home() {
   };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">
-      <div className="max-w-[1000px] mx-auto flex flex-col justify-between h-screen">
+      <div className="max-w-[800px] mx-auto flex flex-col justify-between h-screen">
         <div className="flex flex-1">
           <div className="flex-1 flex-col items-start mt-5 ">
             <Image
@@ -260,14 +260,14 @@ export default function Home() {
               <div className="w-[300px]">
                 <label
                   className={`block font-medium text-white`}
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                 >
                   Drop an image file or video.
                 </label>
                 <input
                   type="file"
                   accept="image/*,video/*"
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "image");
@@ -277,7 +277,7 @@ export default function Home() {
 
               <div className="w-[300px]">
                 <label
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`block font-medium text-white`}
                 >
                   Add your audio.
@@ -286,7 +286,7 @@ export default function Home() {
                   ref={audioInputRef}
                   type="file"
                   accept="audio/*"
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "audio");
@@ -294,7 +294,7 @@ export default function Home() {
                 />
                 {audioFile && (
                   <button
-                    style={{ fontSize: `${fontSize}px` }}
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
                     className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
                     onClick={clearAudio}
                   >
@@ -305,7 +305,7 @@ export default function Home() {
 
               <div className="w-[300px]">
                 <label
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`block font-medium text-white`}
                 >
                   OR write your script and choose a voice for your audio.
@@ -350,6 +350,12 @@ export default function Home() {
                     </SelectItem>
                     <SelectItem
                       className="bg-black text-white"
+                      value="en-US-Standard-F"
+                    >
+                      Eve
+                    </SelectItem>
+                    <SelectItem
+                      className="bg-black text-white"
                       value="en-US-Studio-Q"
                     >
                       John
@@ -366,12 +372,18 @@ export default function Home() {
                     >
                       Luke
                     </SelectItem>
+                    <SelectItem
+                      className="bg-black text-white"
+                      value="en-US-Casual-K"
+                    >
+                      Mark
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="w-[300px]">
                 <label
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`block font-medium text-white`}
                 >
                   Add your eyeblink video or use default.
@@ -379,7 +391,7 @@ export default function Home() {
                 <input
                   type="file"
                   accept="video/*"
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "video");
@@ -390,14 +402,14 @@ export default function Home() {
               <div className="w-[300px]">
                 <label
                   className={`block text-[10px] font-medium text-white`}
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                 >
                   Add your pose (optional)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
                     handleFileUpload(e, "image");
@@ -407,18 +419,18 @@ export default function Home() {
               <div className="flex gap-2">
                 <button
                   onClick={handleToken}
-                  style={{ fontSize: `${fontSize}px` }}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`text-white border-2 font-bold border-[#c230ff] px-2 py-1`}
                 >
                   ADD TOKEN
                 </button>
-                <div className="px-2 py-1 border-2 border-white text-white">
+                <div className="px-2 py-1 border-2 border-[#c230ff] text-white">
                   {creditCount < 10 ? `0${creditCount}` : creditCount}
                 </div>
                 <button
                   onClick={handleClick}
-                  style={{ fontSize: `${fontSize}px` }}
-                  className={`text-white border-2 font-bold border-[#c230ff] px-2 py-1`}
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
+                  className={`text-[#c230ff] border-2 font-bold border-[#c230ff] px-2 py-1`}
                 >
                   SEND
                 </button>
@@ -490,13 +502,13 @@ export default function Home() {
             <div style={{ flexBasis: "60%" }}>
               {" "}
               {/* Video bölümü */}
-              <div className="relative">
+              <div className="relative flex justify-center">
                 {isLoading && waitingVideoUrl ? (
                   <video
                     src={waitingVideoUrl}
                     key={videoKey}
                     muted={false}
-                    className="absolute top-10 left-8 w-[60%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
+                    className="absolute top-7 left-[60px] w-[60%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
                     autoPlay
                     playsInline
                     preload="none"
@@ -506,14 +518,14 @@ export default function Home() {
                   </video>
                 ) : (
                   <img
-                    className="absolute top-10 left-8 w-[60%] h-[80%]" // img'yi div'in tamamını kaplayacak şekilde ayarlar
-                    src="/text_slide.png"
-                    alt="text slide"
+                    className="absolute top-10 left-[40px] w-[60%] h-[80%]" // img'yi div'in tamamını kaplayacak şekilde ayarlar
+                    src="/magic_slide.png"
+                    alt="magic slide"
                   />
                 )}
                 <img
                   className="relative w-[90%] h-[90%]" // Bu imaj da div'in tamamını kaplayacak şekilde pozisyonlandırılır
-                  src="/NEW_TV_FRAME_FIXEDGE2.png"
+                  src="/NEW_TV_FRAME_BLACKEDGE.png"
                   alt="newTv"
                 />
               </div>
