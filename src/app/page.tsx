@@ -34,7 +34,7 @@ export default function Home() {
   const [audioUrl, setAudioUrl] = useState("");
   const [audioFile, setAudioFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [imageObjectUrl, setImageObjectUrl] = useState("/magichat.png");
+  const [imageObjectUrl, setImageObjectUrl] = useState("");
   const [eyeblinkUrl, setEyeblinkUrl] = useState("");
   const [poseUrl, setPoseUrl] = useState("");
   const [creditCount, setCreditCount] = useState(3);
@@ -42,7 +42,7 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(10);
   const aspectRatio = 1805 / 1247; // Sabit oran
   const [isCreated, setIsCreated] = useState(false);
-  const [objectType, setObjectType] = useState("image");
+  const [objectType, setObjectType] = useState("");
   const [containerHeight, setContainerHeight] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const [showCreditForm, setShowCreditForm] = useState(false);
@@ -52,6 +52,13 @@ export default function Home() {
   const [showAlert, setShowAlert] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (isCreated && videoRef.current) {
+      videoRef.current.pause(); // isCreated true ise videoyu duraklat
+    }
+  }, [isCreated]);
 
   useEffect(() => {
     if (imageUrl && (inputText || audioUrl)) {
@@ -172,6 +179,7 @@ export default function Home() {
         const response = await res.json();
         const newUrl = response.url;
         setIsLoading(false);
+        setWaitingVideoUrl("");
         setVideoUrl(newUrl);
         setVideoKey(Date.now());
         setIsCreated(true);
@@ -190,6 +198,7 @@ export default function Home() {
         setImageObjectUrl(objectUrl);
       }
       setFileType(file.type.startsWith("image") ? "image" : "video");
+      setObjectType(file.type.startsWith("image") ? "image" : "video");
       const formData = new FormData();
       formData.append("file", file);
 
@@ -452,7 +461,7 @@ export default function Home() {
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onChange={(e) => {
-                    handleFileUpload(e, "image");
+                    handleFileUpload(e, "pose");
                   }}
                 />
               </div>
@@ -484,15 +493,26 @@ export default function Home() {
           </div>
           <div className="flex flex-1 items-center justify-center z-20 mx-20 my-20 w-full">
             <div>
+              {!imageObjectUrl && (
+                <div className="flex flex-col gap-5 items-center">
+                  <img
+                    alt="Uploaded image"
+                    src="/magichat.png"
+                    className="h-full"
+                  />
+                </div>
+              )}
               {imageObjectUrl && !isCreated && (
                 <div className="flex flex-col gap-5 items-center">
-                  {objectType === "image" && imageObjectUrl ? (
+                  {objectType === "image" && imageObjectUrl && (
                     <img
                       alt="Uploaded image"
                       src={imageObjectUrl}
                       className="h-full"
                     />
-                  ) : (
+                  )}
+
+                  {objectType === "video" && imageObjectUrl && (
                     <video
                       src={imageObjectUrl}
                       width="300"
@@ -550,6 +570,7 @@ export default function Home() {
               <div className="relative flex justify-center">
                 {isLoading && waitingVideoUrl ? (
                   <video
+                    ref={videoRef}
                     src={waitingVideoUrl}
                     key={videoKey}
                     muted={false}
