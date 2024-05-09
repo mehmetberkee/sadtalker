@@ -9,7 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SignInForm from "@/components/SignInForm";
 import { Button } from "@/components/ui/button";
+import BuyCredit from "@/components/BuyCredit";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
+import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function Home() {
@@ -37,7 +39,7 @@ export default function Home() {
   const [imageObjectUrl, setImageObjectUrl] = useState("");
   const [eyeblinkUrl, setEyeblinkUrl] = useState("");
   const [poseUrl, setPoseUrl] = useState("");
-  const [creditCount, setCreditCount] = useState(3);
+  const [creditCount, setCreditCount] = useState(0);
   const [fileType, setFileType] = useState("");
   const [fontSize, setFontSize] = useState(10);
   const aspectRatio = 1805 / 1247; // Sabit oran
@@ -46,6 +48,7 @@ export default function Home() {
   const [containerHeight, setContainerHeight] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
   const [showCreditForm, setShowCreditForm] = useState(false);
+  const [showBuyCredit, setShowBuyCredit] = useState(false);
   const [inputText, setInputText] = useState("");
   const [waitingVideoUrl, setWaitingVideoUrl] = useState<string | null>("");
   const [gender, setGender] = useState("");
@@ -53,13 +56,20 @@ export default function Home() {
   const [isUploaded, setIsUploaded] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [imageObjectType, setImageObjectType] = useState("");
 
+  const { data: session } = useSession();
   useEffect(() => {
     if (isCreated && videoRef.current) {
-      videoRef.current.pause(); // isCreated true ise videoyu duraklat
+      videoRef.current.pause();
     }
   }, [isCreated]);
 
+  useEffect(() => {
+    console.log("session:");
+    console.log(session);
+  }, []);
   useEffect(() => {
     if (imageUrl && (inputText || audioUrl)) {
       setIsUploaded(true);
@@ -102,6 +112,7 @@ export default function Home() {
     };
   }, [window.innerHeight]);
   useEffect(() => {
+    handleCredit();
     const fetchData = async function () {
       const res = await fetch("/api/videoData", {
         method: "POST",
@@ -112,6 +123,7 @@ export default function Home() {
       setVideoURLs(urls);
     };
     fetchData();
+    getCredit();
   }, []);
 
   useEffect(() => {
@@ -121,19 +133,51 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    console.log("eyeblink:");
-    console.log(eyeblinkUrl);
-  });
-  useEffect(() => {
     if (isLoading) {
       setWaitingVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
       setVideoKey(Date.now());
     }
   }, [isLoading]);
 
+  const getCredit = async function () {
+    if (session?.user) {
+      console.log(session.user);
+
+      const res = await fetch("/api/getCredit", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: session?.user.id,
+        }),
+      });
+      const resJSON = await res.json();
+      const credit = resJSON.credit;
+      setCreditCount(credit);
+    } else {
+      console.log("not logged in");
+    }
+  };
+
+  const handleCredit = async function () {
+    if (session?.user) {
+      console.log(session.user);
+
+      const res = await fetch("/api/createCredit", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: session?.user.id,
+        }),
+      });
+    } else {
+      console.log("not logged in");
+    }
+  };
+
   const handleClick = async function () {
     setIsCreated(false);
-    if (creditCount > 0) {
+    if (!session) {
+      setShowForm(true);
+    }
+    if (creditCount > 0 && session) {
       if (inputText) {
         setIsLoading(true);
         const audioRes = await fetch("/api/audio", {
@@ -185,6 +229,9 @@ export default function Home() {
         setIsCreated(true);
       }
     }
+    if (creditCount <= 0 && session) {
+      setShowBuyCredit(true);
+    }
   };
 
   const handleFileUpload = async (event: any, type: string) => {
@@ -196,6 +243,7 @@ export default function Home() {
       const objectUrl = URL.createObjectURL(file);
       if (type === "image") {
         setImageObjectUrl(objectUrl);
+        setImageObjectType(file.type.startsWith("image") ? "image" : "video");
       }
       setFileType(file.type.startsWith("image") ? "image" : "video");
       setObjectType(file.type.startsWith("image") ? "image" : "video");
@@ -263,10 +311,18 @@ export default function Home() {
   };
 
   const handleToken = function () {
+    setShowBuyCredit(true);
     setCreditCount(creditCount + 1);
   };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">
+      {showForm && <SignInForm showForm={showForm} setShowForm={setShowForm} />}
+      {showBuyCredit && (
+        <BuyCredit
+          showBuyCredit={showBuyCredit}
+          setShowBuyCredit={setShowBuyCredit}
+        />
+      )}
       <AlertDialog open={showAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -299,10 +355,6 @@ export default function Home() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (audioUrl && imageUrl) {
-                  handleClick();
-                  console.log("submitted");
-                }
               }}
               className="space-y-4"
             >
@@ -504,15 +556,13 @@ export default function Home() {
               )}
               {imageObjectUrl && !isCreated && (
                 <div className="flex flex-col gap-5 items-center">
-                  {objectType === "image" && imageObjectUrl && (
+                  {imageObjectType === "image" ? (
                     <img
                       alt="Uploaded image"
                       src={imageObjectUrl}
                       className="h-full"
                     />
-                  )}
-
-                  {objectType === "video" && imageObjectUrl && (
+                  ) : (
                     <video
                       src={imageObjectUrl}
                       width="300"
@@ -584,13 +634,13 @@ export default function Home() {
                   </video>
                 ) : (
                   <img
-                    className="absolute top-10 left-[40px] w-[60%] h-[80%]" // img'yi div'in tamamını kaplayacak şekilde ayarlar
+                    className="absolute top-10 left-[40px] w-[60%] h-[80%]"
                     src="/magic_slide.png"
                     alt="magic slide"
                   />
                 )}
                 <img
-                  className="relative w-[90%] h-[90%]" // Bu imaj da div'in tamamını kaplayacak şekilde pozisyonlandırılır
+                  className="relative w-[90%] h-[90%]"
                   src="/NEW_TV_FRAME_BLACKEDGE.png"
                   alt="newTv"
                 />
