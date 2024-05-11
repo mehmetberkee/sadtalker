@@ -370,6 +370,12 @@ export default function Home() {
                   accept="image/*,video/*"
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                  onClick={(e) => {
+                    if (!session) {
+                      e.preventDefault();
+                      setShowForm(true);
+                    }
+                  }}
                   onChange={(e) => {
                     handleFileUpload(e, "image");
                   }}
@@ -389,6 +395,12 @@ export default function Home() {
                   accept="audio/*"
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                  onClick={(e) => {
+                    if (!session) {
+                      e.preventDefault();
+                      setShowForm(true);
+                    }
+                  }}
                   onChange={(e) => {
                     handleFileUpload(e, "audio");
                   }}
@@ -414,6 +426,9 @@ export default function Home() {
                 <Textarea
                   value={inputText}
                   onChange={(e) => {
+                    if (!session) {
+                      setShowForm(true);
+                    }
                     setInputText(e.target.value);
                   }}
                   className="bg-black resize-none text-xs text-white"
@@ -494,6 +509,12 @@ export default function Home() {
                   accept="video/*"
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                  onClick={(e) => {
+                    if (!session) {
+                      e.preventDefault();
+                      setShowForm(true);
+                    }
+                  }}
                   onChange={(e) => {
                     handleFileUpload(e, "video");
                   }}
@@ -512,6 +533,12 @@ export default function Home() {
                   accept="image/*"
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                  onClick={(e) => {
+                    if (!session) {
+                      e.preventDefault();
+                      setShowForm(true);
+                    }
+                  }}
                   onChange={(e) => {
                     handleFileUpload(e, "pose");
                   }}
