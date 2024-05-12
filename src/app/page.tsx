@@ -565,7 +565,7 @@ export default function Home() {
                     isUploaded ? "border-[#c230ff]" : "border-gray-600"
                   }  px-2 py-1`}
                 >
-                  SEND
+                  ZAP!
                 </button>
               </div>
             </form>
