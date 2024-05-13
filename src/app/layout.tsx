@@ -5,10 +5,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./options/authOptions";
 import "./globals.css";
 import Head from "next/head";
+import { title } from "./options/text";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RAYGUN",
+  title: title,
   description: "raygun",
 };
 
