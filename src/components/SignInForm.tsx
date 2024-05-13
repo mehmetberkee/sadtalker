@@ -159,7 +159,8 @@ function SignInForm({ showForm, setShowForm }: SignInFormProps) {
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle className="text-center text-2xl">
-                  Are You HUMAN? Please Verify.
+                  <p className="font-bold">Are You HUMAN?</p>
+                  Please Verify.
                 </DialogTitle>
                 <DialogDescription>
                   <div className="text-xl">

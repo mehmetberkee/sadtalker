@@ -25,9 +25,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
-
+import { tvText } from "./options/text";
 export default function Home() {
-  // State for managing video playback key and mute state.
   const [videoURLs, setVideoURLs] = useState<(string | null)[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>("");
   const [videoKey, setVideoKey] = useState(Date.now());
@@ -637,8 +636,7 @@ export default function Home() {
                 className={`text-white text-left`}
                 style={{ fontSize: `${fontSize * 2}px` }}
               >
-                Your animation is in progress. Sit back, relax and enjoy the
-                show.
+                {tvText}
               </p>
             </div>
             <div style={{ flexBasis: "60%" }}>
