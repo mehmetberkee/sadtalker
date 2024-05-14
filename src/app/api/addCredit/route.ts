@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
   const userId = body.userId;
 
   const command = new UpdateCommand({
-    TableName: "next-auth",
+    TableName: "sadtalkerNew",
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
-    UpdateExpression: "ADD kredi :inc",
+    UpdateExpression: "ADD credit :inc",
     ExpressionAttributeValues: {
       ":inc": 1,
     },
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return new Response(
       JSON.stringify({
         message: "Credit added successfully",
-        newCreditTotal: result!.Attributes!.kredi,
+        newCreditTotal: result!.Attributes!.credit,
       }),
       { status: 200 }
     );

@@ -17,6 +17,19 @@ export const UploadFile = async (form: FormData) => {
 
     const bucketName = "childrenstory-bucket";
     const bucket = storage.bucket(bucketName);
+
+    // Set lifecycle rule on the bucket
+    await bucket.setMetadata({
+      lifecycle: {
+        rule: [
+          {
+            action: { type: "Delete" },
+            condition: { age: 1 }, // Delete files older than 1 day
+          },
+        ],
+      },
+    });
+
     const fileBlob = bucket.file(file.name);
 
     // Save the file to Google Cloud Storage

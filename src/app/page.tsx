@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { UploadFile } from "./lib/actions";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -337,12 +338,14 @@ export default function Home() {
       <div className="max-w-[800px] mx-auto flex flex-col justify-between h-screen">
         <div className="flex flex-1">
           <div className="flex-1 flex-col items-start mt-5 ">
-            <Image
-              alt="logo"
-              src={"/D47G-dashboard-2x-raygun-logo.png"}
-              width={100}
-              height={100}
-            />
+            <Link href={"https://raygun.ai/"}>
+              <Image
+                alt="logo"
+                src={"/D47G-dashboard-2x-raygun-logo.png"}
+                width={100}
+                height={100}
+              />
+            </Link>
 
             <p
               className={`text-white text-left mb-3`}
