@@ -423,6 +423,7 @@ export default function Home() {
                   OR write your script and choose a voice for your audio.
                 </label>
                 <Textarea
+                  disabled={audioUrl ? true : false}
                   value={inputText}
                   onChange={(e) => {
                     if (!session) {
