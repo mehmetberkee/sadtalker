@@ -24,12 +24,12 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
 
 async function getUserCredit(userId: string) {
   const command = new GetCommand({
-    TableName: "next-auth",
+    TableName: "sadtalker",
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
   });
   try {
     const result = await client.send(command);
-    return result.Item?.kredi || 0;
+    return result.Item?.credit || 0;
   } catch (error) {
     console.error("Error fetching user credit:", error);
     return 0;
