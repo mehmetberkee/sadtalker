@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const userId = body.userId;
 
   const command = new UpdateCommand({
-    TableName: "sadtalkerNew",
+    TableName: "sadtalker",
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
     UpdateExpression: "ADD credit :inc",
     ExpressionAttributeValues: {
