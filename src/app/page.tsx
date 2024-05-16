@@ -312,7 +312,6 @@ export default function Home() {
 
   const handleToken = function () {
     setShowBuyCredit(true);
-    setCreditCount(creditCount + 1);
   };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">
@@ -321,6 +320,8 @@ export default function Home() {
         <BuyCredit
           showBuyCredit={showBuyCredit}
           setShowBuyCredit={setShowBuyCredit}
+          creditCount={creditCount}
+          setCreditCount={setCreditCount}
         />
       )}
       <AlertDialog open={showAlert}>

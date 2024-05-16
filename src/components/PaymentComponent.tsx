@@ -1,49 +1,119 @@
-"use client";
+import React, { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { useSession } from "next-auth/react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "./ui/button";
 
-function PaymentComponent() {
+interface PaymentInterface {
+  creditCount: any;
+  setCreditCount: any;
+  showBuyCredit: any;
+  setShowBuyCredit: any;
+  isScriptLoaded: any;
+  setIsScriptLoaded: any;
+}
+const PaymentComponent = ({
+  creditCount,
+  setCreditCount,
+  showBuyCredit,
+  setShowBuyCredit,
+  isScriptLoaded,
+  setIsScriptLoaded,
+}: PaymentInterface) => {
   const { data: session } = useSession();
+  const paypalRef = useRef<HTMLDivElement>(null);
 
+  const [paymentSuccessful, setPaymentSuccessful] = useState(false);
   const addCredit = async function () {
     if (session?.user) {
       const res = await fetch("/api/addCredit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ userId: session?.user?.id }),
       });
-      if (!res.ok) {
-        console.error("Failed to add credit");
-      } else {
-        console.log("Credit added successfully");
-      }
     }
   };
+  useEffect(() => {
+    if (isScriptLoaded && window.paypal && !paymentSuccessful) {
+      window.paypal
+        .Buttons({
+          createOrder: (data: any, actions: any) => {
+            return actions.order.create({
+              intent: "CAPTURE",
+              purchase_units: [
+                {
+                  description: "token",
+                  amount: {
+                    currency_code: "USD",
+                    value: 1.0,
+                  },
+                },
+              ],
+            });
+          },
+          onApprove: async (data: any, actions: any) => {
+            const order = await actions.order.capture();
+            console.log("successful order:", order);
+            await addCredit();
+            setPaymentSuccessful(true);
+          },
+          onError: (err: any) => {
+            console.error("PayPal Button Error:", err);
+          },
+        })
+        .render(paypalRef.current);
+    }
+  }, [isScriptLoaded]);
 
   return (
-    <>
+    <div>
       <Script
-        src="https://www.paypal.com/sdk/js?client-id=BAA93KMHLc6-DecbhTiai1oIwLjx1nyWQupHLk7kqf7Ffd8dcypMFkNyES8LQpF7R1YVknDTuNfFgK1cnI&components=hosted-buttons&enable-funding=venmo&currency=USD"
+        src="https://www.paypal.com/sdk/js?client-id=ATk9UOlq4DNa7YJ8wfl4s4lBeiNYCIgNYa8-xntjbHDRakQG89bTE4O_87i61fMB3pBY3A-qKUWZYowA&enable-funding=venmo&currency=USD"
         onLoad={() => {
-          if (window.paypal) {
-            window.paypal
-              .HostedButtons({
-                hostedButtonId: "LK47HZMJ9ULCA",
-                onApprove: async (data: any, actions: any) => {
-                  const details = await actions.order.capture();
-                  console.log("Payment successful:", details);
-                  await addCredit();
-                },
-              })
-              .render("#paypal-container-LK47HZMJ9ULCA");
-          }
+          console.log("PayPal script loaded");
+          setIsScriptLoaded(true);
         }}
       />
-      <div className="overflow-auto" id="paypal-container-LK47HZMJ9ULCA"></div>
-    </>
+      {!paymentSuccessful && (
+        <div>
+          <p className="text-xl text-center my-5">1 TOKEN = $1</p>
+          <div ref={paypalRef}></div>
+        </div>
+      )}
+      <AlertDialog open={paymentSuccessful}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Payment successful</AlertDialogTitle>
+            <AlertDialogDescription>
+              1 TOKEN added to your account
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              className="bg-red-500"
+              onClick={() => {
+                setPaymentSuccessful(false);
+                setCreditCount(creditCount + 1);
+                setShowBuyCredit(false);
+                setIsScriptLoaded(false);
+              }}
+            >
+              Continue
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
-}
+};
 
 export default PaymentComponent;
