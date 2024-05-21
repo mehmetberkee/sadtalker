@@ -12,6 +12,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select-org";
+
 import { Button } from "./ui/button";
 
 interface PaymentInterface {
@@ -33,12 +41,14 @@ const PaymentComponent = ({
   const { data: session } = useSession();
   const paypalRef = useRef<HTMLDivElement>(null);
 
+  const [requestedCredit, setRequestedCredit] = useState(1);
   const [paymentSuccessful, setPaymentSuccessful] = useState(false);
-  const addCredit = async function () {
+  const [isClicked, setIsClicked] = useState(false);
+  const addCredit = async function (requestedCredit: number) {
     if (session?.user) {
       const res = await fetch("/api/addCredit", {
         method: "POST",
-        body: JSON.stringify({ userId: session?.user?.id }),
+        body: JSON.stringify({ userId: session?.user?.id, requestedCredit }),
       });
     }
   };
@@ -54,7 +64,7 @@ const PaymentComponent = ({
                   description: "token",
                   amount: {
                     currency_code: "USD",
-                    value: 1.0,
+                    value: requestedCredit,
                   },
                 },
               ],
@@ -63,7 +73,7 @@ const PaymentComponent = ({
           onApprove: async (data: any, actions: any) => {
             const order = await actions.order.capture();
             console.log("successful order:", order);
-            await addCredit();
+            await addCredit(requestedCredit);
             setPaymentSuccessful(true);
           },
           onError: (err: any) => {
@@ -72,7 +82,7 @@ const PaymentComponent = ({
         })
         .render(paypalRef.current);
     }
-  }, [isScriptLoaded]);
+  }, [isClicked]);
 
   return (
     <div>
@@ -85,7 +95,44 @@ const PaymentComponent = ({
       />
       {!paymentSuccessful && (
         <div>
-          <p className="text-xl text-center my-5">1 TOKEN = $1</p>
+          <div className="flex flex-col">
+            <div className="flex gap-2 items-center justify-center">
+              <Select
+                onValueChange={(value) => {
+                  setRequestedCredit(Number(value));
+                }}
+              >
+                <SelectTrigger className="w-[60px]">
+                  <SelectValue placeholder="1" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="6">6</SelectItem>
+                  <SelectItem value="7">7</SelectItem>
+                  <SelectItem value="8">8</SelectItem>
+                  <SelectItem value="9">9</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xl text-center my-5">
+                TOKEN = ${requestedCredit}
+              </p>
+            </div>
+            {!isClicked && (
+              <Button
+                onClick={() => {
+                  setIsClicked(true);
+                }}
+                className="text-white bg-red-700"
+              >
+                BUY NOW
+              </Button>
+            )}
+          </div>
           <div ref={paypalRef}></div>
         </div>
       )}
@@ -94,7 +141,7 @@ const PaymentComponent = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Payment successful</AlertDialogTitle>
             <AlertDialogDescription>
-              1 TOKEN added to your account
+              {requestedCredit} TOKEN added to your account
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -102,7 +149,7 @@ const PaymentComponent = ({
               className="bg-red-500"
               onClick={() => {
                 setPaymentSuccessful(false);
-                setCreditCount(creditCount + 1);
+                setCreditCount(creditCount + requestedCredit);
                 setShowBuyCredit(false);
                 setIsScriptLoaded(false);
               }}

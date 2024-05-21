@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select-org";
 import SignInForm from "@/components/SignInForm";
 import { Button } from "@/components/ui/button";
 import BuyCredit from "@/components/BuyCredit";
@@ -27,6 +27,7 @@ import {
 import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { tvText } from "./options/text";
+
 export default function Home() {
   const [videoURLs, setVideoURLs] = useState<(string | null)[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>("");
@@ -60,6 +61,9 @@ export default function Home() {
   const [imageObjectType, setImageObjectType] = useState("");
 
   const { data: session } = useSession();
+
+  const [audioDuration, setAudioDuration] = useState(0);
+
   useEffect(() => {
     if (isCreated && videoRef.current) {
       videoRef.current.pause();
@@ -71,6 +75,10 @@ export default function Home() {
     console.log(session);
   }, []);
   useEffect(() => {
+    if (imageUrl && inputText && !audioUrl) {
+      console.log(inputText.split(" ").length);
+      setAudioDuration(Math.floor(inputText.split(" ").length) / 100);
+    }
     if (imageUrl && (inputText || audioUrl)) {
       setIsUploaded(true);
     } else {
@@ -244,6 +252,13 @@ export default function Home() {
       if (type === "image") {
         setImageObjectUrl(objectUrl);
         setImageObjectType(file.type.startsWith("image") ? "image" : "video");
+      } else if (type === "audio") {
+        const audio = new Audio(objectUrl);
+        audio.addEventListener("loadedmetadata", () => {
+          setAudioDuration(Math.floor(audio.duration) / 60);
+          setAudioFile(file);
+          setAudioUrl(objectUrl);
+        });
       }
       setFileType(file.type.startsWith("image") ? "image" : "video");
       setObjectType(file.type.startsWith("image") ? "image" : "video");
@@ -264,9 +279,6 @@ export default function Home() {
           setIsUploaded(true);
           if (type === "image") {
             setImageUrl(uploadSuccess.url);
-          } else if (type === "audio") {
-            setAudioFile(file);
-            setAudioUrl(uploadSuccess.url);
           } else if (type === "video") {
             setEyeblinkUrl(uploadSuccess.url);
           } else if (type === "pose") {
@@ -548,6 +560,14 @@ export default function Home() {
                   }}
                 />
               </div>
+              {isUploaded && (
+                <p className="text-white">
+                  TOTAL:{" "}
+                  {audioDuration > 1
+                    ? `${Math.floor(audioDuration)} TOKEN`
+                    : "1 TOKEN"}
+                </p>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={handleToken}
