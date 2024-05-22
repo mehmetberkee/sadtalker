@@ -186,6 +186,11 @@ export default function Home() {
       setShowForm(true);
     }
     if (creditCount > 0 && session) {
+      setCreditCount(creditCount - 1);
+      const resCredit = await fetch("/api/useCredit", {
+        method: "POST",
+        body: JSON.stringify({ userId: session?.user?.id }),
+      });
       if (inputText) {
         setIsLoading(true);
         const audioRes = await fetch("/api/audio", {
@@ -257,7 +262,6 @@ export default function Home() {
         audio.addEventListener("loadedmetadata", () => {
           setAudioDuration(Math.floor(audio.duration) / 60);
           setAudioFile(file);
-          setAudioUrl(objectUrl);
         });
       }
       setFileType(file.type.startsWith("image") ? "image" : "video");
@@ -283,6 +287,8 @@ export default function Home() {
             setEyeblinkUrl(uploadSuccess.url);
           } else if (type === "pose") {
             setPoseUrl(uploadSuccess.url);
+          } else if (type === "audio") {
+            setAudioUrl(uploadSuccess.url);
           }
         } else {
           console.error("Upload failed");
@@ -424,7 +430,7 @@ export default function Home() {
                     handleFileUpload(e, "audio");
                   }}
                 />
-                {audioFile && (
+                {audioFile && audioUrl && (
                   <button
                     style={{ fontSize: `${fontSize * 1.3}px` }}
                     className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
