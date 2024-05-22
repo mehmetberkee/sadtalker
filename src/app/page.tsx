@@ -323,7 +323,11 @@ export default function Home() {
   };
 
   const handleToken = function () {
-    setShowBuyCredit(true);
+    if (session) {
+      setShowBuyCredit(true);
+    } else {
+      setShowForm(true);
+    }
   };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">

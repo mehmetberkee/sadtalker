@@ -29,6 +29,8 @@ interface PaymentInterface {
   setShowBuyCredit: any;
   isScriptLoaded: any;
   setIsScriptLoaded: any;
+  isClicked: boolean;
+  setIsClicked: any;
 }
 const PaymentComponent = ({
   creditCount,
@@ -37,13 +39,15 @@ const PaymentComponent = ({
   setShowBuyCredit,
   isScriptLoaded,
   setIsScriptLoaded,
+  isClicked,
+  setIsClicked,
 }: PaymentInterface) => {
   const { data: session } = useSession();
   const paypalRef = useRef<HTMLDivElement>(null);
 
   const [requestedCredit, setRequestedCredit] = useState(1);
   const [paymentSuccessful, setPaymentSuccessful] = useState(false);
-  const [isClicked, setIsClicked] = useState(false);
+
   const addCredit = async function (requestedCredit: number) {
     if (session?.user) {
       const res = await fetch("/api/addCredit", {
