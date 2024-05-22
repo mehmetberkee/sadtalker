@@ -25,7 +25,7 @@ function BuyCredit({
   setCreditCount,
 }: BuyCreditInterface) {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
-
+  const [isClicked, setIsClicked] = useState(false);
   return (
     <div>
       <div>
@@ -38,6 +38,8 @@ function BuyCredit({
               <DialogDescription>
                 <div>
                   <PaymentComponent
+                    isClicked={isClicked}
+                    setIsClicked={setIsClicked}
                     creditCount={creditCount}
                     setCreditCount={setCreditCount}
                     showBuyCredit={showBuyCredit}
@@ -50,6 +52,7 @@ function BuyCredit({
                   onClick={() => {
                     setIsScriptLoaded(false);
                     setShowBuyCredit(false);
+                    setIsClicked(false);
                   }}
                   className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
                 >
