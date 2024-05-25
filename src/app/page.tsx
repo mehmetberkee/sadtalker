@@ -191,6 +191,7 @@ export default function Home() {
         method: "POST",
         body: JSON.stringify({ userId: session?.user?.id }),
       });
+
       if (inputText) {
         setIsLoading(true);
         const audioRes = await fetch("/api/audio", {
@@ -246,7 +247,6 @@ export default function Home() {
       setShowBuyCredit(true);
     }
   };
-
   const handleFileUpload = async (event: any, type: string) => {
     console.log("handle upload");
 
