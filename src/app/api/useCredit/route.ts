@@ -13,6 +13,7 @@ const client = new DynamoDBClient({
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 export async function POST(req: NextRequest) {
+  console.log("credit decrease:");
   const body = await req.json();
   const userId = body.userId;
 
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
   }
 
   const command = new UpdateCommand({
-    TableName: "spacecraft",
+    TableName: "sadtalker",
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
     UpdateExpression: "ADD credit :dec",
     ExpressionAttributeValues: {
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
 
 async function getCurrentCredits(userId: string) {
   const getItemCommand = new GetCommand({
-    TableName: "spacecraft",
+    TableName: "sadtalker",
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
   });
 
