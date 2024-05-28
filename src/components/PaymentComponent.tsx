@@ -57,7 +57,7 @@ const PaymentComponent = ({
     }
   };
   useEffect(() => {
-    if (isScriptLoaded && window.paypal && !paymentSuccessful) {
+    if (isScriptLoaded && window.paypal && !paymentSuccessful && isClicked) {
       window.paypal
         .Buttons({
           createOrder: (data: any, actions: any) => {
@@ -88,6 +88,17 @@ const PaymentComponent = ({
     }
   }, [isClicked]);
 
+  const loadScript = function () {
+    return (
+      <Script
+        src="https://www.paypal.com/sdk/js?client-id=ATk9UOlq4DNa7YJ8wfl4s4lBeiNYCIgNYa8-xntjbHDRakQG89bTE4O_87i61fMB3pBY3A-qKUWZYowA&enable-funding=venmo&currency=USD"
+        onLoad={() => {
+          console.log("PayPal script loaded");
+          setIsScriptLoaded(true);
+        }}
+      />
+    );
+  };
   return (
     <div>
       <Script
@@ -130,6 +141,11 @@ const PaymentComponent = ({
               <Button
                 onClick={() => {
                   setIsClicked(true);
+                  setIsScriptLoaded(true);
+                  console.log("isScriptLoaded: " + isScriptLoaded);
+                  console.log("window.paypal: " + window.paypal);
+                  console.log("paymentSuccessful: " + paymentSuccessful);
+                  console.log("isClicked: " + isClicked);
                 }}
                 className="text-white bg-red-700"
               >
