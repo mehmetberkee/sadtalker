@@ -255,6 +255,8 @@ export default function Home() {
     if (file) {
       const objectUrl = URL.createObjectURL(file);
       if (type === "image") {
+        console.log("filetype:");
+        console.log(file.type);
         setImageObjectUrl(objectUrl);
         setImageObjectType(file.type.startsWith("image") ? "image" : "video");
       } else if (type === "audio") {
@@ -643,7 +645,7 @@ export default function Home() {
                   ></video>
                 </div>
               )}
-              {imageObjectUrl && (
+              {imageObjectUrl && isCreated && (
                 <div className="flex flex-col gap-5 items-center">
                   <button className="mt-5" disabled={videoUrl ? false : true}>
                     <a
