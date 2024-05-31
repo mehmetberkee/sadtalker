@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
     UpdateExpression: "SET credit = if_not_exists(credit, :start)",
     ExpressionAttributeValues: {
-      ":start": 0,
+      ":start": 3,
     },
     ConditionExpression: "attribute_not_exists(credit)",
     ReturnValues: "UPDATED_NEW",
