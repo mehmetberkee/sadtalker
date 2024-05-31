@@ -361,7 +361,7 @@ export default function Home() {
       </AlertDialog>
 
       <div className="max-w-[800px] mx-auto flex flex-col justify-between h-screen">
-        <div className="flex flex-1">
+        <div className="flex flex-1 ml-5 md:ml-0">
           <div className="flex-1 flex-col items-start mt-5 ">
             <Link href={"https://raygun.ai/"}>
               <Image
@@ -667,10 +667,10 @@ export default function Home() {
           </div>
         </div>
         <div className="w-full mx-auto flex-1 flex-col items-center justify-center gap-2 mb-10">
-          <div className="flex w-full items-center justify-center h-full">
+          <div className="flex md:flex-row flex-col w-full items-center justify-center h-full md:mt-0 mt-10">
             <div className="flex-1 mr-10" style={{ flexBasis: "40%" }}>
               <p
-                className={`text-white text-left`}
+                className={`text-white md:text-left text-center`}
                 style={{ fontSize: `${fontSize * 2}px` }}
               >
                 {tvText}
