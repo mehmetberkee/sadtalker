@@ -686,7 +686,7 @@ export default function Home() {
                     src={waitingVideoUrl}
                     key={videoKey}
                     muted={false}
-                    className="absolute top-7 left-[60px] w-[60%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
+                    className="absolute top-7 md:left-[60px] left-[50px] w-[60%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
                     autoPlay
                     playsInline
                     preload="none"
@@ -696,7 +696,7 @@ export default function Home() {
                   </video>
                 ) : (
                   <img
-                    className="absolute top-10 left-[40px] w-[60%] h-[80%]"
+                    className="absolute md:top-10 top-5 left-[40px] w-[60%] h-[80%]"
                     src="/magic_slide.png"
                     alt="magic slide"
                   />
