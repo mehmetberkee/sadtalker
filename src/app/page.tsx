@@ -226,17 +226,7 @@ export default function Home() {
     const file = event.target.files[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
-
       if (type === "image") {
-        const allowedTypes = ["image/png", "image/jpg"];
-        if (!allowedTypes.includes(file.type)) {
-          setFileError(true);
-          console.error(
-            "Invalid file type. Only PNG and JPG files are allowed."
-          );
-          return;
-        }
-
         console.log("filetype:");
         console.log(file.type);
         setImageObjectUrl(objectUrl);
@@ -248,7 +238,6 @@ export default function Home() {
           setAudioFile(file);
         });
       }
-
       setFileType(file.type.startsWith("image") ? "image" : "video");
       setObjectType(file.type.startsWith("image") ? "image" : "video");
       const formData = new FormData();
@@ -257,7 +246,7 @@ export default function Home() {
       try {
         console.log("lets try");
         const uploadSuccess = await UploadFile(formData);
-        console.log("upload success");
+        console.log("upload succes");
         console.log(uploadSuccess);
         if (
           uploadSuccess &&
