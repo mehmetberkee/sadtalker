@@ -256,15 +256,6 @@ export default function Home() {
           console.log("File uploaded successfully: " + uploadSuccess.url);
           setIsUploaded(true);
           if (type === "image") {
-<<<<<<< HEAD
-            setImageUrl(uploadSuccess.url || "");
-          } else if (type === "video") {
-            setEyeblinkUrl(uploadSuccess.url || "");
-          } else if (type === "pose") {
-            setPoseUrl(uploadSuccess.url || "");
-          } else if (type === "audio") {
-            setAudioUrl(uploadSuccess.url || "");
-=======
             setImageUrl(uploadSuccess.url);
           } else if (type === "video") {
             setEyeblinkUrl(uploadSuccess.url);
@@ -272,7 +263,6 @@ export default function Home() {
             setPoseUrl(uploadSuccess.url);
           } else if (type === "audio") {
             setAudioUrl(uploadSuccess.url);
->>>>>>> 3522ca80e8c4430636685a625f6f22521576eaab
           }
         } else {
           console.error("Upload failed");
