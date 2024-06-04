@@ -1,6 +1,6 @@
 "use server";
-
-import { Storage } from "@google-cloud/storage";
+import AWS from "aws-sdk";
+import { S3 } from "aws-sdk";
 
 export const UploadFile = async (form: FormData) => {
   try {
@@ -8,41 +8,31 @@ export const UploadFile = async (form: FormData) => {
     if (!file) throw new Error("No file provided");
     if (file.size < 1) throw new Error("File is empty");
 
-    const buffer = await file.arrayBuffer();
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    const storage = new Storage({
-      projectId: "childrenstory-413616",
-      keyFilename: "public/childrenstory-413616-132e7537e436.json",
+    // Configure AWS SDK for JavaScript
+    AWS.config.update({
+      accessKeyId: process.env.AUTH_S3_ID,
+      secretAccessKey: process.env.AUTH_S3_SECRET,
+      region: "us-east-1",
     });
 
-    const bucketName = "childrenstory-bucket";
-    const bucket = storage.bucket(bucketName);
+    const s3 = new S3();
 
-    // Set lifecycle rule on the bucket
-    await bucket.setMetadata({
-      lifecycle: {
-        rule: [
-          {
-            action: { type: "Delete" },
-            condition: { age: 1 }, // Delete files older than 1 day
-          },
-        ],
-      },
-    });
+    const bucketName = "zapbucket";
+    const params = {
+      Bucket: bucketName,
+      Key: file.name,
+      Body: buffer,
+      ACL: "public-read",
+    };
 
-    const fileBlob = bucket.file(file.name);
+    // Upload file to S3
+    const data = await s3.upload(params).promise();
 
-    // Save the file to Google Cloud Storage
-    await fileBlob.save(Buffer.from(buffer));
-
-    await fileBlob.makePublic();
-
-    // Construct the public URL
-    const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileBlob.name}`;
-
-    return { success: true, url: publicUrl };
+    return { success: true, url: data.Location };
   } catch (error) {
     console.error(error);
-    return false;
+    return { success: false, error: String(error) };
   }
 };
