@@ -13,6 +13,9 @@ import {
 import SignInForm from "@/components/SignInForm";
 import { Button } from "@/components/ui/button";
 import BuyCredit from "@/components/BuyCredit";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,9 +62,9 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showForm, setShowForm] = useState(false);
   const [imageObjectType, setImageObjectType] = useState("");
-
+  const [still, setStill] = useState(false);
   const { data: session } = useSession();
-
+  const [fileError, setFileError] = useState(false);
   const [audioDuration, setAudioDuration] = useState(0);
 
   useEffect(() => {
@@ -192,56 +195,25 @@ export default function Home() {
         body: JSON.stringify({ userId: session?.user?.id }),
       });
 
-      if (inputText) {
-        setIsLoading(true);
-        const audioRes = await fetch("/api/audio", {
-          method: "POST",
-          body: JSON.stringify({
-            text: inputText,
-            gender: gender,
-          }),
-        });
-        const audioJson = await audioRes.json();
-        const audio = await audioJson.url;
-
-        const res = await fetch("/api/talk", {
-          method: "POST",
-          body: JSON.stringify({
-            audioUrl: audio,
-            imageUrl: imageUrl,
-            poseUrl: poseUrl,
-            eyeblinkUrl: eyeblinkUrl,
-          }),
-        });
-        const response = await res.json();
-        const newUrl = response.url;
-        if (newUrl === "error") {
-          setIsLoading(false);
-          setShowAlert(true);
-        } else {
-          setVideoUrl(newUrl);
-          setVideoKey(Date.now());
-          setIsCreated(true);
-        }
-      } else {
-        setIsLoading(true);
-        const res = await fetch("/api/talk", {
-          method: "POST",
-          body: JSON.stringify({
-            audioUrl: audioUrl,
-            imageUrl: imageUrl,
-            poseUrl: poseUrl,
-            eyeblinkUrl: eyeblinkUrl,
-          }),
-        });
-        const response = await res.json();
-        const newUrl = response.url;
-        setIsLoading(false);
-        setWaitingVideoUrl("");
-        setVideoUrl(newUrl);
-        setVideoKey(Date.now());
-        setIsCreated(true);
-      }
+      setIsLoading(true);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        body: JSON.stringify({
+          imageUrl: imageUrl,
+          inputText: inputText,
+          gender: gender,
+          still: still,
+          poseUrl: poseUrl,
+          eyeblinkUrl: eyeblinkUrl,
+        }),
+      });
+      const response = await res.json();
+      const newUrl = response.url;
+      setIsLoading(false);
+      setWaitingVideoUrl("");
+      setVideoUrl(newUrl);
+      setVideoKey(Date.now());
+      setIsCreated(true);
     }
     if (creditCount <= 0 && session) {
       setShowBuyCredit(true);
@@ -254,7 +226,17 @@ export default function Home() {
     const file = event.target.files[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
+
       if (type === "image") {
+        const allowedTypes = ["image/png", "image/jpg"];
+        if (!allowedTypes.includes(file.type)) {
+          setFileError(true);
+          console.error(
+            "Invalid file type. Only PNG and JPG files are allowed."
+          );
+          return;
+        }
+
         console.log("filetype:");
         console.log(file.type);
         setImageObjectUrl(objectUrl);
@@ -266,6 +248,7 @@ export default function Home() {
           setAudioFile(file);
         });
       }
+
       setFileType(file.type.startsWith("image") ? "image" : "video");
       setObjectType(file.type.startsWith("image") ? "image" : "video");
       const formData = new FormData();
@@ -274,7 +257,7 @@ export default function Home() {
       try {
         console.log("lets try");
         const uploadSuccess = await UploadFile(formData);
-        console.log("upload succes");
+        console.log("upload success");
         console.log(uploadSuccess);
         if (
           uploadSuccess &&
@@ -339,6 +322,27 @@ export default function Home() {
   };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">
+      <AlertDialog open={fileError}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              onClick={() => {
+                setFileError(false);
+              }}
+            >
+              Cancel
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {showForm && <SignInForm showForm={showForm} setShowForm={setShowForm} />}
       {showBuyCredit && (
         <BuyCredit
@@ -362,19 +366,19 @@ export default function Home() {
 
       <div className="max-w-[800px] mx-auto flex flex-col justify-between h-screen">
         <div className="flex flex-1 ml-5 md:ml-0">
-          <div className="flex-1 flex-col items-start mt-5 ">
+          <div className="flex-1 flex-col items-start mt-3 mb-2 ">
             <Link href={"https://raygun.ai/"}>
-              <Image
+              <img
                 alt="logo"
-                src={"/D47G-dashboard-2x-raygun-logo.png"}
-                width={100}
-                height={100}
+                src={"/raygunlogo.png"}
+                width={150}
+                height={150}
               />
             </Link>
 
             <p
               className={`text-white text-left mb-3`}
-              style={{ fontSize: `${fontSize * 1.5}px` }}
+              style={{ fontSize: `${fontSize * 2}px` }}
             >
               Upload your image or videoclip, add your audio, choose face
               enhancer, add your pose and that&apos;s it!
@@ -407,40 +411,6 @@ export default function Home() {
                     handleFileUpload(e, "image");
                   }}
                 />
-              </div>
-
-              <div className="w-[300px]">
-                <label
-                  style={{ fontSize: `${fontSize * 1.3}px` }}
-                  className={`block font-medium text-white`}
-                >
-                  Add your audio.
-                </label>
-                <input
-                  ref={audioInputRef}
-                  type="file"
-                  accept="audio/*"
-                  style={{ fontSize: `${fontSize * 1.3}px` }}
-                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
-                  onClick={(e) => {
-                    if (!session) {
-                      e.preventDefault();
-                      setShowForm(true);
-                    }
-                  }}
-                  onChange={(e) => {
-                    handleFileUpload(e, "audio");
-                  }}
-                />
-                {audioFile && audioUrl && (
-                  <button
-                    style={{ fontSize: `${fontSize * 1.3}px` }}
-                    className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
-                    onClick={clearAudio}
-                  >
-                    Clear Audio
-                  </button>
-                )}
               </div>
 
               <div className="w-[300px]">
@@ -526,6 +496,22 @@ export default function Home() {
                 </Select>
               </div>
               <div className="w-[300px]">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={still}
+                    onCheckedChange={() => {
+                      console.log("current:");
+                      console.log(still);
+                      setStill(!still);
+                    }}
+                    className="text-white border-gray-600"
+                  />
+                  <p className="text-white text-xs">
+                    still (fewer head motion)
+                  </p>
+                </div>
+              </div>
+              <div className="w-[300px]">
                 <label
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`block font-medium text-white`}
@@ -592,7 +578,10 @@ export default function Home() {
                   {creditCount < 10 ? `0${creditCount}` : creditCount}
                 </div>
                 <button
-                  onClick={handleClick}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClick();
+                  }}
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   disabled={!isUploaded}
                   className={`${

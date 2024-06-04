@@ -44,7 +44,6 @@ const PaymentComponent = ({
 }: PaymentInterface) => {
   const { data: session } = useSession();
   const paypalRef = useRef<HTMLDivElement>(null);
-
   const [requestedCredit, setRequestedCredit] = useState(1);
   const [paymentSuccessful, setPaymentSuccessful] = useState(false);
 
@@ -91,7 +90,7 @@ const PaymentComponent = ({
   return (
     <div>
       <Script
-        src="https://www.paypal.com/sdk/js?client-id=AaUOHHqnJaZmJOgfzyf35eCvM3ktkXo-jBUZr6kGBK5dTPtGyQFY0hxfvJO-296FcSGi2l__dS6_W30w&enable-funding=venmo&currency=USD"
+        src="https://www.paypal.com/sdk/js?client-id=AcFXZ5aZULP7lieCdnSN5wX1ly1z_xWqdNyZov8wxycaBGoSWvMsQfY97gi-FkyWifHQqO9zBCS63Lgy&enable-funding=venmo&currency=USD"
         onLoad={() => {
           console.log("PayPal script loaded");
           setIsScriptLoaded(true);
