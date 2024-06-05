@@ -79,9 +79,11 @@ export default function Home() {
   }, []);
   useEffect(() => {
     if (imageUrl && inputText && !audioUrl) {
-      console.log(inputText.split(" ").length);
-      setAudioDuration(Math.floor(inputText.split(" ").length) / 100);
+      const wordCount = (inputText.match(/\b\w+\b/g) || []).length;
+      console.log(wordCount);
+      setAudioDuration(Math.ceil(wordCount / 100));
     }
+
     if (imageUrl && (inputText || audioUrl)) {
       setIsUploaded(true);
     } else {
@@ -256,13 +258,13 @@ export default function Home() {
           console.log("File uploaded successfully: " + uploadSuccess.url);
           setIsUploaded(true);
           if (type === "image") {
-            setImageUrl(uploadSuccess.url);
+            setImageUrl(uploadSuccess.url || "");
           } else if (type === "video") {
-            setEyeblinkUrl(uploadSuccess.url);
+            setEyeblinkUrl(uploadSuccess.url || "");
           } else if (type === "pose") {
-            setPoseUrl(uploadSuccess.url);
+            setPoseUrl(uploadSuccess.url || "");
           } else if (type === "audio") {
-            setAudioUrl(uploadSuccess.url);
+            setAudioUrl(uploadSuccess.url || "");
           }
         } else {
           console.error("Upload failed");
