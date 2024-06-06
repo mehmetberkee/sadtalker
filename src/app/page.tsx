@@ -355,25 +355,27 @@ export default function Home() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="max-w-[800px] mx-auto flex flex-col justify-between h-screen">
+      <div className="max-w-[1000px] mx-auto flex flex-col justify-between h-screen">
+        <Link href={"https://raygun.ai/"}>
+          <img
+            alt="logo"
+            src={"/raygunlogo.png"}
+            width={150}
+            height={150}
+            className="my-2"
+          />
+        </Link>
+
+        <p
+          className={`text-white text-left mb-3 w-full`}
+          style={{ fontSize: `${fontSize * 2}px` }}
+        >
+          Upload your image or videoclip and add your audio. Choose fewer head
+          motion if you would like less animation. Custom eyeblink video and
+          pose is optional.
+        </p>
         <div className="flex flex-1 ml-5 md:ml-0">
           <div className="flex-1 flex-col items-start mt-3 mb-2 ">
-            <Link href={"https://raygun.ai/"}>
-              <img
-                alt="logo"
-                src={"/raygunlogo.png"}
-                width={150}
-                height={150}
-              />
-            </Link>
-
-            <p
-              className={`text-white text-left mb-3`}
-              style={{ fontSize: `${fontSize * 2}px` }}
-            >
-              Upload your image or videoclip, add your audio, choose face
-              enhancer, add your pose and that&apos;s it!
-            </p>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -498,7 +500,7 @@ export default function Home() {
                     className="text-white border-gray-600"
                   />
                   <p className="text-white text-xs">
-                    still (fewer head motion)
+                    Still (fewer head motion)
                   </p>
                 </div>
               </div>
