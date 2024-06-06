@@ -109,7 +109,7 @@ function SignInForm({ showForm, setShowForm }: SignInFormProps) {
                         type="submit"
                         disabled={!isSent && isCustomLoading}
                         onClick={handleCustomEmailSignIn}
-                        className="w-full tracking-wide text-xl bg-black text-white py-2 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="w-full tracking-wide text-xl bg-black text-white py-2 px-4 rounded-md hover:bg-black"
                       >
                         {isCustomLoading ? <Spinner /> : "Sign in with Email"}
                       </Button>
@@ -126,7 +126,7 @@ function SignInForm({ showForm, setShowForm }: SignInFormProps) {
                             signIn("google");
                             setShowForm(false);
                           }}
-                          className="w-full bg-black text-gray-600 py-2 px-4 border border-gray-300 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          className="w-full bg-black text-gray-600 py-2 px-4 border border-gray-300 rounded-md hover:bg-black"
                         >
                           <div className="flex text-xl items-center justify-center tracking-wide text-white">
                             Continue with Google
