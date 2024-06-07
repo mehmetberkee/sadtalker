@@ -30,6 +30,7 @@ import {
 import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { tvText } from "./options/text";
+import Spinner from "@/components/Spinner";
 
 export default function Home() {
   const [videoURLs, setVideoURLs] = useState<(string | null)[]>([]);
@@ -66,7 +67,24 @@ export default function Home() {
   const { data: session } = useSession();
   const [fileError, setFileError] = useState(false);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [isVideoUploading, setIsVideoUploading] = useState(false);
+  const [isAudioUrlExist, setIsAudioUrlExist] = useState(false);
+  const [isError, setIsError] = useState(false);
 
+  useEffect(() => {
+    if (audioUrl) {
+      setIsAudioUrlExist(true);
+    } else {
+      setIsAudioUrlExist(false);
+    }
+  }, [audioUrl]);
+  useEffect(() => {
+    if (imageObjectUrl && !imageUrl) {
+      setIsVideoUploading(true);
+    } else {
+      setIsVideoUploading(false);
+    }
+  }, [imageObjectUrl, imageUrl]);
   useEffect(() => {
     if (isCreated && videoRef.current) {
       videoRef.current.pause();
@@ -186,39 +204,87 @@ export default function Home() {
   };
 
   const handleClick = async function () {
-    setIsCreated(false);
-    if (!session) {
-      setShowForm(true);
-    }
-    if (creditCount > 0 && session) {
-      setCreditCount(creditCount - 1);
-      const resCredit = await fetch("/api/useCredit", {
-        method: "POST",
-        body: JSON.stringify({ userId: session?.user?.id }),
-      });
+    try {
+      setIsCreated(false);
+      if (!session) {
+        setShowForm(true);
+      }
+      if (creditCount > 0 && session) {
+        setCreditCount(creditCount - 1);
+        const resCredit = await fetch("/api/useCredit", {
+          method: "POST",
+          body: JSON.stringify({ userId: session?.user?.id }),
+        });
 
-      setIsLoading(true);
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        body: JSON.stringify({
-          imageUrl: imageUrl,
-          inputText: inputText,
-          gender: gender,
-          still: still,
-          poseUrl: poseUrl,
-          eyeblinkUrl: eyeblinkUrl,
-        }),
-      });
-      const response = await res.json();
-      const newUrl = response.url;
-      setIsLoading(false);
-      setWaitingVideoUrl("");
-      setVideoUrl(newUrl);
-      setVideoKey(Date.now());
-      setIsCreated(true);
+        setIsLoading(true);
+
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          body: JSON.stringify({
+            imageUrl: imageUrl,
+            inputText: inputText,
+            gender: gender,
+            still: still,
+            poseUrl: poseUrl,
+            eyeblinkUrl: eyeblinkUrl,
+          }),
+        });
+        const response = await res.json();
+        const newUrl = response.url;
+        setIsLoading(false);
+        setWaitingVideoUrl("");
+        setVideoUrl(newUrl);
+        setVideoKey(Date.now());
+        setIsCreated(true);
+      }
+      if (creditCount <= 0 && session) {
+        setShowBuyCredit(true);
+      }
+    } catch {
+      setShowAlert(true);
     }
-    if (creditCount <= 0 && session) {
-      setShowBuyCredit(true);
+  };
+
+  const handleClickWithAudio = async function () {
+    try {
+      setIsCreated(false);
+      if (!session) {
+        setShowForm(true);
+      }
+      if (creditCount > 0 && session) {
+        setCreditCount(creditCount - 1);
+        const resCredit = await fetch("/api/useCredit", {
+          method: "POST",
+          body: JSON.stringify({ userId: session?.user?.id }),
+        });
+
+        setIsLoading(true);
+
+        const res = await fetch("/api/generateWithAudio", {
+          method: "POST",
+          body: JSON.stringify({
+            audioUrl: audioUrl,
+            imageUrl: imageUrl,
+
+            gender: gender,
+            still: still,
+            poseUrl: poseUrl,
+            eyeblinkUrl: eyeblinkUrl,
+          }),
+        });
+        const response = await res.json();
+        const newUrl = response.url;
+        setIsLoading(false);
+        setWaitingVideoUrl("");
+        setVideoUrl(newUrl);
+        setVideoKey(Date.now());
+        setIsCreated(true);
+      }
+      if (creditCount <= 0 && session) {
+        setShowBuyCredit(true);
+      }
+    } catch {
+      setShowAlert(true);
     }
   };
   const handleFileUpload = async (event: any, type: string) => {
@@ -389,9 +455,37 @@ export default function Home() {
                 >
                   Drop an image file or video.
                 </label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                    onClick={(e) => {
+                      if (!session) {
+                        e.preventDefault();
+                        setShowForm(true);
+                      }
+                    }}
+                    onChange={(e) => {
+                      handleFileUpload(e, "image");
+                    }}
+                  />
+                  {isVideoUploading ? <Spinner /> : ""}
+                </div>
+              </div>
+
+              <div className="w-[300px]">
+                <label
+                  style={{ fontSize: `${fontSize * 1.3}px` }}
+                  className={`block font-medium text-white`}
+                >
+                  Add your audio.
+                </label>
                 <input
+                  ref={audioInputRef}
                   type="file"
-                  accept="image/*,video/*"
+                  accept="audio/*"
                   style={{ fontSize: `${fontSize * 1.3}px` }}
                   className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
                   onClick={(e) => {
@@ -401,11 +495,19 @@ export default function Home() {
                     }
                   }}
                   onChange={(e) => {
-                    handleFileUpload(e, "image");
+                    handleFileUpload(e, "audio");
                   }}
                 />
+                {audioFile && audioUrl && (
+                  <button
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
+                    onClick={clearAudio}
+                  >
+                    Clear Audio
+                  </button>
+                )}
               </div>
-
               <div className="w-[300px]">
                 <label
                   style={{ fontSize: `${fontSize * 1.3}px` }}
@@ -570,21 +672,45 @@ export default function Home() {
                 <div className="px-2 py-1 border-2 border-[#c230ff] text-white">
                   {creditCount < 10 ? `0${creditCount}` : creditCount}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClick();
-                  }}
-                  style={{ fontSize: `${fontSize * 1.3}px` }}
-                  disabled={!isUploaded}
-                  className={`${
-                    isUploaded ? "text-[#c230ff]" : "text-gray-600"
-                  }  border-2 font-bold ${
-                    isUploaded ? "border-[#c230ff]" : "border-gray-600"
-                  }  px-2 py-1`}
-                >
-                  ZAP!
-                </button>
+                {!isAudioUrlExist ? (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log("audioUrl:");
+                      console.log(audioUrl);
+
+                      handleClick();
+                    }}
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    disabled={!isUploaded}
+                    className={`${
+                      isUploaded ? "text-[#c230ff]" : "text-gray-600"
+                    }  border-2 font-bold ${
+                      isUploaded ? "border-[#c230ff]" : "border-gray-600"
+                    }  px-2 py-1`}
+                  >
+                    ZAP!
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log("audioUrl:");
+                      console.log(audioUrl);
+
+                      handleClickWithAudio();
+                    }}
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    disabled={!isUploaded}
+                    className={`${
+                      isUploaded ? "text-[#c230ff]" : "text-gray-600"
+                    }  border-2 font-bold ${
+                      isUploaded ? "border-[#c230ff]" : "border-gray-600"
+                    }  px-2 py-1`}
+                  >
+                    ZAP!
+                  </button>
+                )}
               </div>
             </form>
           </div>
