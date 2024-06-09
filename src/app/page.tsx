@@ -436,9 +436,11 @@ export default function Home() {
           className={`text-white text-left mb-3 w-full`}
           style={{ fontSize: `${fontSize * 2}px` }}
         >
-          Upload your image or videoclip and add your audio. Choose fewer head
-          motion if you would like less animation. Custom eyeblink video and
-          pose is optional.
+          Upload your image or videoclip and add your audio or text to audio.
+          Please make sure your image has good lighting and a clear picture of
+          the face, preferably the mouth closed for best results. Choose fewer
+          head motion if you would like less animation. Custom eyeblink video
+          and pose is optional.
         </p>
         <div className="flex flex-1 ml-5 md:ml-0">
           <div className="flex-1 flex-col items-start mt-3 mb-2 ">
