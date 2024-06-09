@@ -14,6 +14,7 @@ import SignInForm from "@/components/SignInForm";
 import { Button } from "@/components/ui/button";
 import BuyCredit from "@/components/BuyCredit";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AiOutlineSound } from "react-icons/ai";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import {
@@ -70,6 +71,24 @@ export default function Home() {
   const [isVideoUploading, setIsVideoUploading] = useState(false);
   const [isAudioUrlExist, setIsAudioUrlExist] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [hoverMary, setHoverMary] = useState(false);
+  const [hoverVeronica, setHoverVeronica] = useState(false);
+  const [hoverHannah, setHoverHannah] = useState(false);
+  const [hoverEve, setHoverEve] = useState(false);
+  const [hoverJohn, setHoverJohn] = useState(false);
+  const [hoverMatt, setHoverMatt] = useState(false);
+  const [hoverLuke, setHoverLuke] = useState(false);
+  const [hoverMark, setHoverMark] = useState(false);
+  const [curCharacter, setCurCharacter] = useState("");
+  const [isPlayAudio, setIsPlayAudio] = useState(false);
+  const audioRef = useRef(null);
+
+  const playAudio = () => {
+    console.log("clicked:");
+    if (audioRef.current) {
+      audioRef.current.play(); // This should now correctly reference the audio element
+    }
+  };
 
   useEffect(() => {
     if (audioUrl) {
@@ -377,8 +396,71 @@ export default function Home() {
       setShowForm(true);
     }
   };
+
+  const handleNewAudio = async function (text: string, gender: string) {
+    const res = await fetch("/api/audio", {
+      method: "POST",
+      body: JSON.stringify({
+        text: text,
+        gender: gender,
+      }),
+    });
+  };
+
+  useEffect(() => {
+    if (curCharacter) {
+      playAudio();
+    }
+  }, [curCharacter]);
+  const audioPlay = function (
+    hoverFunc: any,
+    setHoverFunc: any,
+    audioCharacter: string,
+    character: string
+  ) {
+    return (
+      <div className="relative group ">
+        <SelectItem
+          onMouseEnter={() => {
+            setHoverFunc(true);
+          }}
+          onMouseLeave={() => {
+            setHoverFunc(false);
+          }}
+          className="bg-black text-white "
+          value={audioCharacter}
+        >
+          <div className="flex justify-between items-center w-full">
+            <p>{character}</p>
+          </div>
+        </SelectItem>
+        <Button
+          className={`absolute top-0 right-0 bg-transparent hover:bg-transparent `}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            setCurCharacter(audioCharacter);
+          }}
+        >
+          <AiOutlineSound
+            className={`${hoverFunc ? "text-black" : "text-white"} w-4 h-4`}
+          />
+        </Button>
+      </div>
+    );
+  };
   return (
     <div className="h-screen w-full bg-black overflow-x-hidden">
+      <audio
+        ref={audioRef}
+        key={Date.now()}
+        src={`voices/${curCharacter}.mp3`}
+        onEnded={() => {
+          console.log("ended");
+        }}
+      />
+
       <AlertDialog open={fileError}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -547,54 +629,54 @@ export default function Home() {
                     <SelectValue placeholder="Select a voice" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Studio-O"
-                    >
-                      Mary
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Wavenet-G"
-                    >
-                      Veronica
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Wavenet-H"
-                    >
-                      Hannah
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Standard-F"
-                    >
-                      Eve
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Studio-Q"
-                    >
-                      John
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Wavenet-B"
-                    >
-                      Matt
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Wavenet-J"
-                    >
-                      Luke
-                    </SelectItem>
-                    <SelectItem
-                      className="bg-black text-white"
-                      value="en-US-Casual-K"
-                    >
-                      Mark
-                    </SelectItem>
+                    {audioPlay(
+                      hoverMary,
+                      setHoverMary,
+                      "en-US-Studio-O",
+                      "Mary"
+                    )}
+                    {audioPlay(
+                      hoverVeronica,
+                      setHoverVeronica,
+                      "en-US-Wavenet-G",
+                      "Veronica"
+                    )}
+                    {audioPlay(
+                      hoverHannah,
+                      setHoverHannah,
+                      "en-US-Wavenet-H",
+                      "Hannah"
+                    )}
+                    {audioPlay(
+                      hoverEve,
+                      setHoverEve,
+                      "en-US-Standard-F",
+                      "Eve"
+                    )}
+                    {audioPlay(
+                      hoverJohn,
+                      setHoverJohn,
+                      "en-US-Studio-Q",
+                      "John"
+                    )}
+                    {audioPlay(
+                      hoverMatt,
+                      setHoverMatt,
+                      "en-US-Wavenet-B",
+                      "Matt"
+                    )}
+                    {audioPlay(
+                      hoverLuke,
+                      setHoverLuke,
+                      "en-US-Wavenet-J",
+                      "Luke"
+                    )}
+                    {audioPlay(
+                      hoverMark,
+                      setHoverMark,
+                      "en-US-Casual-K",
+                      "Mark"
+                    )}
                   </SelectContent>
                 </Select>
               </div>
