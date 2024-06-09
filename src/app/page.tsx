@@ -86,7 +86,7 @@ export default function Home() {
   const playAudio = () => {
     console.log("clicked:");
     if (audioRef.current) {
-      audioRef.current.play(); // This should now correctly reference the audio element
+      audioRef.current.play();
     }
   };
 
@@ -442,9 +442,7 @@ export default function Home() {
             setCurCharacter(audioCharacter);
           }}
         >
-          <AiOutlineSound
-            className={`${hoverFunc ? "text-black" : "text-white"} w-4 h-4`}
-          />
+          TTT
         </Button>
       </div>
     );
