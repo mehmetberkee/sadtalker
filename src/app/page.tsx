@@ -501,13 +501,19 @@ export default function Home() {
                   }}
                 />
                 {audioFile && audioUrl && (
-                  <button
-                    style={{ fontSize: `${fontSize * 1.3}px` }}
-                    className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
-                    onClick={clearAudio}
-                  >
-                    Clear Audio
-                  </button>
+                  <div>
+                    <audio controls>
+                      <source src={audioUrl} type="audio/mp3" />
+                      Your browser does not support the audio element.
+                    </audio>
+                    <button
+                      style={{ fontSize: `${fontSize * 1.3}px` }}
+                      className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
+                      onClick={clearAudio}
+                    >
+                      Clear Audio
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="w-[300px]">

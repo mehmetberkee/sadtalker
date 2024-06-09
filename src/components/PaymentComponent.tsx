@@ -130,12 +130,8 @@ const PaymentComponent = ({
                 onClick={() => {
                   setIsClicked(true);
                   setIsScriptLoaded(true);
-                  console.log("isScriptLoaded: " + isScriptLoaded);
-                  console.log("window.paypal: " + window.paypal);
-                  console.log("paymentSuccessful: " + paymentSuccessful);
-                  console.log("isClicked: " + isClicked);
                 }}
-                className="text-white bg-red-700"
+                className="text-white bg-black"
               >
                 BUY NOW
               </Button>
