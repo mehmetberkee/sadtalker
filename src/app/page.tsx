@@ -81,7 +81,7 @@ export default function Home() {
   const [hoverMark, setHoverMark] = useState(false);
   const [curCharacter, setCurCharacter] = useState("");
   const [isPlayAudio, setIsPlayAudio] = useState(false);
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const playAudio = () => {
     console.log("clicked:");
@@ -284,7 +284,6 @@ export default function Home() {
           body: JSON.stringify({
             audioUrl: audioUrl,
             imageUrl: imageUrl,
-
             gender: gender,
             still: still,
             poseUrl: poseUrl,
@@ -435,11 +434,11 @@ export default function Home() {
           </div>
         </SelectItem>
         <Button
-          className={`absolute top-0 right-0 bg-transparent hover:bg-transparent `}
+          className={`absolute w-max h-max top-0 right-0 bg-transparent hover:bg-transparent focus-visible:none`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-
+            setGender(audioCharacter);
             setCurCharacter(audioCharacter);
           }}
         >
