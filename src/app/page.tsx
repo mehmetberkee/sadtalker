@@ -442,7 +442,9 @@ export default function Home() {
             setCurCharacter(audioCharacter);
           }}
         >
-          TTT
+          <AiOutlineSound
+            className={`${hoverFunc ? "text-black" : "text-white"} w-4 h-4`}
+          />
         </Button>
       </div>
     );
