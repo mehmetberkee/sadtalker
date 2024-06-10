@@ -893,7 +893,7 @@ export default function Home() {
                   </video>
                 ) : (
                   <img
-                    className="absolute md:top-10 top-5 left-[40px] w-[60%] h-[80%]"
+                    className="absolute md:top-10 top-5 left-[50px] w-[60%] h-[80%]"
                     src="/magic_slide.png"
                     alt="magic slide"
                   />
