@@ -521,7 +521,7 @@ export default function Home() {
           Please make sure your image has good lighting and a clear picture of
           the face, preferably the mouth closed for best results. Choose fewer
           head motion if you would like less animation. Custom eyeblink video
-          and pose is optional.
+          and pose is optional. LETS TRY
         </p>
         <div className="flex flex-1 ml-5 md:ml-0">
           <div className="flex-1 flex-col items-start mt-3 mb-2 ">
