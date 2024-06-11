@@ -260,6 +260,9 @@ export default function Home() {
         setShowBuyCredit(true);
       }
     } catch {
+      if (session) {
+        addCredit(1);
+      }
       setShowAlert(true);
     }
   };
@@ -359,6 +362,17 @@ export default function Home() {
     }
   };
 
+  const addCredit = async function (requestedCredit: number) {
+    if (session?.user) {
+      const res = await fetch("/api/addCredit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: session?.user?.id, requestedCredit }),
+      });
+    }
+  };
   const clearAudio = () => {
     URL.revokeObjectURL(audioUrl);
     setAudioFile(null);

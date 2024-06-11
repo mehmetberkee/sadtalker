@@ -14,17 +14,63 @@ export async function POST(req: NextRequest) {
   console.log(eyeblinkUrl);
   console.log("pose url:");
   console.log(poseUrl);
-  const payload = {
-    input_face: imageUrl,
-    sadtalker_settings: {
-      still: still,
-      preprocess: "full",
-      pose_style: 1,
-      expression_scale: 1,
-    },
-    selected_model: "SadTalker",
-    input_audio: audioUrl,
-  };
+  let payload = {};
+  if (poseUrl && !eyeblinkUrl) {
+    payload = {
+      input_face: imageUrl,
+      sadtalker_settings: {
+        still: still,
+        preprocess: "full",
+        pose_style: 1,
+        expression_scale: 1,
+        ref_pose: poseUrl,
+      },
+      selected_model: "SadTalker",
+      input_audio: audioUrl,
+    };
+  }
+  if (!poseUrl && eyeblinkUrl) {
+    payload = {
+      input_face: imageUrl,
+      sadtalker_settings: {
+        still: still,
+        preprocess: "full",
+        pose_style: 1,
+        expression_scale: 1,
+        ref_pose: poseUrl,
+      },
+      selected_model: "SadTalker",
+      input_audio: audioUrl,
+    };
+  }
+  if (poseUrl && eyeblinkUrl) {
+    payload = {
+      input_face: imageUrl,
+      sadtalker_settings: {
+        still: still,
+        preprocess: "full",
+        pose_style: 1,
+        expression_scale: 1,
+        ref_eyeblink: eyeblinkUrl,
+        ref_pose: poseUrl,
+      },
+      selected_model: "SadTalker",
+      input_audio: audioUrl,
+    };
+  }
+  if (!poseUrl && !eyeblinkUrl) {
+    payload = {
+      input_face: imageUrl,
+      sadtalker_settings: {
+        still: still,
+        preprocess: "full",
+        pose_style: 1,
+        expression_scale: 1,
+      },
+      selected_model: "SadTalker",
+      input_audio: audioUrl,
+    };
+  }
 
   const response = await fetch("https://api.gooey.ai/v2/Lipsync/", {
     method: "POST",

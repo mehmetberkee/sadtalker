@@ -20,6 +20,8 @@ export async function POST(req: NextRequest) {
       preprocess: "full",
       pose_style: 1,
       expression_scale: 1,
+      ref_eyeblink: eyeblinkUrl,
+      ref_pose: poseUrl,
     },
     selected_model: "SadTalker",
   };
