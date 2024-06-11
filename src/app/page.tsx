@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { tvText } from "./options/text";
 import Spinner from "@/components/Spinner";
@@ -565,7 +565,31 @@ export default function Home() {
             className="my-2"
           />
         </Link>
-
+        {session ? (
+          <div className="flex gap-2">
+            <p className="text-white">Hello {session?.user?.name}</p>
+            <button
+              className="text-red-400"
+              onClick={() => {
+                signOut();
+              }}
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <p className="text-white">You are not signed in</p>
+            <button
+              className="text-red-400"
+              onClick={() => {
+                setShowForm(true);
+              }}
+            >
+              Sign in
+            </button>
+          </div>
+        )}
         <p
           className={`text-white text-left mb-3 w-full`}
           style={{ fontSize: `${fontSize * 2}px` }}
