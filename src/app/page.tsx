@@ -81,6 +81,10 @@ export default function Home() {
   const [hoverMark, setHoverMark] = useState(false);
   const [curCharacter, setCurCharacter] = useState("");
   const [isPlayAudio, setIsPlayAudio] = useState(false);
+  const [isEyeblinkUploading, setIsEyeblinkUploading] = useState(false);
+  const [isPoseUploading, setIsPoseUploading] = useState(false);
+  const [isPose, setIsPose] = useState(false);
+  const [isEyeblink, setIsEyeblink] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const playAudio = () => {
@@ -104,6 +108,24 @@ export default function Home() {
       setIsVideoUploading(false);
     }
   }, [imageObjectUrl, imageUrl]);
+
+  useEffect(() => {
+    if (isEyeblink && !eyeblinkUrl) {
+      console.log("eyeblink ture");
+      setIsEyeblinkUploading(true);
+    } else {
+      console.log("eyeblink false");
+      setIsEyeblinkUploading(false);
+    }
+  }, [isEyeblink, eyeblinkUrl]);
+
+  useEffect(() => {
+    if (isPose && !poseUrl) {
+      setIsPoseUploading(true);
+    } else {
+      setIsPoseUploading(false);
+    }
+  }, [isPose, poseUrl]);
   useEffect(() => {
     if (isCreated && videoRef.current) {
       videoRef.current.pause();
@@ -314,6 +336,11 @@ export default function Home() {
     setIsUploaded(false);
     const file = event.target.files[0];
     if (file) {
+      if (type === "video") {
+        setIsEyeblink(true);
+      } else if (type === "pose") {
+        setIsPose(true);
+      }
       const objectUrl = URL.createObjectURL(file);
       if (type === "image") {
         console.log("filetype:");
@@ -716,21 +743,24 @@ export default function Home() {
                 >
                   Add your eyeblink video or use default.
                 </label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  style={{ fontSize: `${fontSize * 1.3}px` }}
-                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
-                  onClick={(e) => {
-                    if (!session) {
-                      e.preventDefault();
-                      setShowForm(true);
-                    }
-                  }}
-                  onChange={(e) => {
-                    handleFileUpload(e, "video");
-                  }}
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                    onClick={(e) => {
+                      if (!session) {
+                        e.preventDefault();
+                        setShowForm(true);
+                      }
+                    }}
+                    onChange={(e) => {
+                      handleFileUpload(e, "video");
+                    }}
+                  />
+                  {isEyeblinkUploading ? <Spinner /> : ""}
+                </div>
               </div>
 
               <div className="w-[300px]">
@@ -740,21 +770,24 @@ export default function Home() {
                 >
                   Add your pose (optional)
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ fontSize: `${fontSize * 1.3}px` }}
-                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
-                  onClick={(e) => {
-                    if (!session) {
-                      e.preventDefault();
-                      setShowForm(true);
-                    }
-                  }}
-                  onChange={(e) => {
-                    handleFileUpload(e, "pose");
-                  }}
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                    onClick={(e) => {
+                      if (!session) {
+                        e.preventDefault();
+                        setShowForm(true);
+                      }
+                    }}
+                    onChange={(e) => {
+                      handleFileUpload(e, "pose");
+                    }}
+                  />
+                  {isPoseUploading ? <Spinner /> : ""}
+                </div>
               </div>
               {isUploaded && (
                 <p className="text-white">
