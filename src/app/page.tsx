@@ -86,7 +86,8 @@ export default function Home() {
   const [isPose, setIsPose] = useState(false);
   const [isEyeblink, setIsEyeblink] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-
+  const [isAudio, setIsAudio] = useState(false);
+  const [isAudioUploading, setIsAudioUploading] = useState(false);
   const playAudio = () => {
     console.log("clicked:");
     if (audioRef.current) {
@@ -126,6 +127,14 @@ export default function Home() {
       setIsPoseUploading(false);
     }
   }, [isPose, poseUrl]);
+
+  useEffect(() => {
+    if (isAudio && !audioUrl) {
+      setIsAudioUploading(true);
+    } else {
+      setIsAudioUploading(false);
+    }
+  }, [audioUrl, isAudio]);
   useEffect(() => {
     if (isCreated && videoRef.current) {
       videoRef.current.pause();
@@ -336,6 +345,9 @@ export default function Home() {
     setIsUploaded(false);
     const file = event.target.files[0];
     if (file) {
+      if (type === "audio") {
+        setIsAudio(true);
+      }
       if (type === "video") {
         setIsEyeblink(true);
       } else if (type === "pose") {
@@ -606,28 +618,27 @@ export default function Home() {
                 >
                   Add your audio.
                 </label>
-                <input
-                  ref={audioInputRef}
-                  type="file"
-                  accept="audio/*"
-                  style={{ fontSize: `${fontSize * 1.3}px` }}
-                  className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
-                  onClick={(e) => {
-                    if (!session) {
-                      e.preventDefault();
-                      setShowForm(true);
-                    }
-                  }}
-                  onChange={(e) => {
-                    handleFileUpload(e, "audio");
-                  }}
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept="audio/*"
+                    style={{ fontSize: `${fontSize * 1.3}px` }}
+                    className={`mt-1 p-2 w-full border border-gray-300 rounded-md shadow-sm text-white`}
+                    onClick={(e) => {
+                      if (!session) {
+                        e.preventDefault();
+                        setShowForm(true);
+                      }
+                    }}
+                    onChange={(e) => {
+                      handleFileUpload(e, "audio");
+                    }}
+                  />
+                  {isAudioUploading ? <Spinner /> : ""}
+                </div>
                 {audioFile && audioUrl && (
                   <div>
-                    <audio controls>
-                      <source src={audioUrl} type="audio/mp3" />
-                      Your browser does not support the audio element.
-                    </audio>
                     <button
                       style={{ fontSize: `${fontSize * 1.3}px` }}
                       className="mt-2 bg-red-500 text-white px-2 py-1 rounded-md"
@@ -818,11 +829,25 @@ export default function Home() {
                       handleClick();
                     }}
                     style={{ fontSize: `${fontSize * 1.3}px` }}
-                    disabled={!isUploaded}
+                    disabled={
+                      !(
+                        isUploaded &&
+                        imageUrl &&
+                        ((inputText && gender) || audioFile)
+                      )
+                    }
                     className={`${
-                      isUploaded ? "text-[#c230ff]" : "text-gray-600"
+                      isUploaded &&
+                      imageUrl &&
+                      ((inputText && gender) || audioFile)
+                        ? "text-[#c230ff]"
+                        : "text-gray-600"
                     }  border-2 font-bold ${
-                      isUploaded ? "border-[#c230ff]" : "border-gray-600"
+                      isUploaded &&
+                      imageUrl &&
+                      ((inputText && gender) || audioFile)
+                        ? "border-[#c230ff]"
+                        : "border-gray-600"
                     }  px-2 py-1`}
                   >
                     ZAP!
