@@ -556,40 +556,41 @@ export default function Home() {
       </AlertDialog>
 
       <div className="max-w-[1000px] mx-auto flex flex-col justify-between h-screen">
-        <Link href={"https://raygun.ai/"}>
-          <img
-            alt="logo"
-            src={"/raygunlogo.png"}
-            width={150}
-            height={150}
-            className="my-2"
-          />
-        </Link>
-        {session ? (
-          <div className="flex gap-2">
-            <p className="text-white">Hello {session?.user?.name}</p>
-            <button
-              className="text-red-400"
-              onClick={() => {
-                signOut();
-              }}
-            >
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <p className="text-white">You are not signed in</p>
-            <button
-              className="text-red-400"
-              onClick={() => {
-                setShowForm(true);
-              }}
-            >
-              Sign in
-            </button>
-          </div>
-        )}
+        <div className="flex justify-between">
+          <Link href={"https://raygun.ai/"}>
+            <img
+              alt="logo"
+              src={"/raygunlogo.png"}
+              width={150}
+              height={150}
+              className="my-2"
+            />
+          </Link>
+          {session ? (
+            <div className="flex items-center gap-2">
+              <button
+                className="text-white border border-white h-min px-2 py-1"
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                SIGN OUT
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                className="text-white border border-white h-min px-2 py-1"
+                onClick={() => {
+                  setShowForm(true);
+                }}
+              >
+                SIGN IN
+              </button>
+            </div>
+          )}
+        </div>
+
         <p
           className={`text-white text-left mb-3 w-full`}
           style={{ fontSize: `${fontSize * 2}px` }}
