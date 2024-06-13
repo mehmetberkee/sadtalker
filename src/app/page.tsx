@@ -509,6 +509,7 @@ export default function Home() {
         key={Date.now()}
         src={`voices/${curCharacter}.mp3`}
         onEnded={() => {
+          setCurCharacter("");
           console.log("ended");
         }}
       />
