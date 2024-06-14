@@ -268,7 +268,7 @@ export default function Home() {
 
         setIsLoading(true);
 
-        const res = await fetch("/api/generate", {
+        const res = await fetch("/api/startGenerationText", {
           method: "POST",
           body: JSON.stringify({
             imageUrl: imageUrl,
@@ -279,12 +279,29 @@ export default function Home() {
             eyeblinkUrl: eyeblinkUrl,
           }),
         });
-        const response = await res.json();
-        const newUrl = response.url;
+        const obj = await res.json();
+        const statusUrl = await obj.status_url;
+        while (true) {
+          const newRes = await fetch("/api/statusGenerationText", {
+            method: "POST",
+            body: JSON.stringify({ status_url: statusUrl }),
+          });
+          const newResJson = await newRes.json();
+          const curStatus = newResJson.status;
+          if (curStatus === "not yet") {
+            console.log("not yet");
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          } else {
+            console.log("succes:");
+            console.log(newResJson);
+            setVideoUrl(newResJson.output.output_video);
+            setVideoKey(Date.now());
+            break;
+          }
+        }
         setIsLoading(false);
         setWaitingVideoUrl("");
-        setVideoUrl(newUrl);
-        setVideoKey(Date.now());
+
         setIsCreated(true);
       }
       if (creditCount <= 0 && session) {
@@ -312,7 +329,38 @@ export default function Home() {
         });
 
         setIsLoading(true);
-
+        const res = await fetch("/api/startGeneration", {
+          method: "POST",
+          body: JSON.stringify({
+            audioUrl: audioUrl,
+            imageUrl: imageUrl,
+            gender: gender,
+            still: still,
+            poseUrl: poseUrl,
+            eyeblinkUrl: eyeblinkUrl,
+          }),
+        });
+        const obj = await res.json();
+        const statusUrl = await obj.status_url;
+        while (true) {
+          const newRes = await fetch("/api/statusGeneration", {
+            method: "POST",
+            body: JSON.stringify({ status_url: statusUrl }),
+          });
+          const newResJson = await newRes.json();
+          const curStatus = newResJson.status;
+          if (curStatus === "not yet") {
+            console.log("not yet");
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          } else {
+            console.log("succes:");
+            console.log(newResJson);
+            setVideoUrl(newResJson.output.output_video);
+            setVideoKey(Date.now());
+            break;
+          }
+        }
+        /*
         const res = await fetch("/api/generateWithAudio", {
           method: "POST",
           body: JSON.stringify({
@@ -325,11 +373,12 @@ export default function Home() {
           }),
         });
         const response = await res.json();
+        console.log("response:");
+        console.log(response);
         const newUrl = response.url;
+        */
         setIsLoading(false);
         setWaitingVideoUrl("");
-        setVideoUrl(newUrl);
-        setVideoKey(Date.now());
         setIsCreated(true);
       }
       if (creditCount <= 0 && session) {
@@ -427,15 +476,15 @@ export default function Home() {
 
     try {
       const response = await fetch(videoUrl);
-      const blob = await response.blob(); // Convert the response to a Blob.
-      const downloadUrl = window.URL.createObjectURL(blob); // Create a URL for the Blob.
-      const a = document.createElement("a"); // Create a <a> element.
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
       a.href = downloadUrl;
-      a.download = "downloadedVideo.mp4"; // Set the download filename.
-      document.body.appendChild(a); // Append the <a> to the document.
-      a.click(); // Programmatically click the <a> to trigger the download.
-      a.remove(); // Clean up.
-      window.URL.revokeObjectURL(downloadUrl); // Revoke the blob URL.
+      a.download = "downloadedVideo.mp4";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Failed to download the file:", error);
     }
