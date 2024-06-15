@@ -215,11 +215,14 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoading) {
-      setWaitingVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
-      setVideoKey(Date.now());
+      randomVideo();
     }
   }, [isLoading]);
 
+  const randomVideo = function () {
+    setWaitingVideoUrl(videoURLs[Math.floor(Math.random() * 19)]);
+    setVideoKey(Date.now());
+  };
   const getCredit = async function () {
     if (session?.user) {
       console.log(session.user);
@@ -253,17 +256,17 @@ export default function Home() {
     }
   };
 
-  const handleClick = async function () {
+  const handleClick = async function (usedCredit: number) {
     try {
       setIsCreated(false);
       if (!session) {
         setShowForm(true);
       }
-      if (creditCount > 0 && session) {
-        setCreditCount(creditCount - 1);
+      if (creditCount > 0 && session && audioDuration) {
+        setCreditCount(creditCount - Math.floor(audioDuration));
         const resCredit = await fetch("/api/useCredit", {
           method: "POST",
-          body: JSON.stringify({ userId: session?.user?.id }),
+          body: JSON.stringify({ userId: session?.user?.id, usedCredit }),
         });
 
         setIsLoading(true);
@@ -321,8 +324,8 @@ export default function Home() {
       if (!session) {
         setShowForm(true);
       }
-      if (creditCount > 0 && session) {
-        setCreditCount(creditCount - 1);
+      if (creditCount > 0 && session && audioDuration) {
+        setCreditCount(creditCount - Math.floor(audioDuration));
         const resCredit = await fetch("/api/useCredit", {
           method: "POST",
           body: JSON.stringify({ userId: session?.user?.id }),
@@ -900,8 +903,9 @@ export default function Home() {
                       e.preventDefault();
                       console.log("audioUrl:");
                       console.log(audioUrl);
-
-                      handleClick();
+                      if (audioDuration > 0) {
+                        handleClick(Math.floor(audioDuration));
+                      }
                     }}
                     style={{ fontSize: `${fontSize * 1.3}px` }}
                     disabled={
@@ -1030,6 +1034,9 @@ export default function Home() {
                     src={waitingVideoUrl}
                     key={videoKey}
                     muted={false}
+                    onEnded={() => {
+                      randomVideo();
+                    }}
                     className="absolute top-7 md:left-[60px] left-[50px] w-[60%] h-[80%]" // videoyu div'in tamamını kaplayacak şekilde ayarlar
                     autoPlay
                     playsInline

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   console.log("credit decrease:");
   const body = await req.json();
   const userId = body.userId;
-
+  const usedCredit = body.usedCredit;
   const currentCredits = await getCurrentCredits(userId);
   if (currentCredits <= 0) {
     return new Response(
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     Key: { pk: `USER#${userId}`, sk: `USER#${userId}` },
     UpdateExpression: "ADD credit :dec",
     ExpressionAttributeValues: {
-      ":dec": -1,
+      ":dec": -1 * usedCredit,
     },
     ReturnValues: "UPDATED_NEW",
   });
