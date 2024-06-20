@@ -88,13 +88,18 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isAudio, setIsAudio] = useState(false);
   const [isAudioUploading, setIsAudioUploading] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
   const playAudio = () => {
     console.log("clicked:");
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
-
+  useEffect(() => {
+    if (isStarted) {
+      console.log("isStarted true");
+    }
+  }, [isStarted]);
   useEffect(() => {
     if (audioUrl) {
       setIsAudioUrlExist(true);
@@ -259,6 +264,7 @@ export default function Home() {
   const handleClick = async function (usedCredit: number) {
     try {
       setIsCreated(false);
+      setIsStarted(true);
       if (!session) {
         setShowForm(true);
       }
@@ -299,6 +305,7 @@ export default function Home() {
             console.log(newResJson);
             setVideoUrl(newResJson.output.output_video);
             setVideoKey(Date.now());
+            setIsStarted(false);
             break;
           }
         }
@@ -912,19 +919,22 @@ export default function Home() {
                       !(
                         isUploaded &&
                         imageUrl &&
-                        ((inputText && gender) || audioFile)
+                        ((inputText && gender) || audioFile) &&
+                        !isStarted
                       )
                     }
                     className={`${
                       isUploaded &&
                       imageUrl &&
-                      ((inputText && gender) || audioFile)
+                      ((inputText && gender) || audioFile) &&
+                      !isStarted
                         ? "text-[#c230ff]"
                         : "text-gray-600"
                     }  border-2 font-bold ${
                       isUploaded &&
                       imageUrl &&
-                      ((inputText && gender) || audioFile)
+                      ((inputText && gender) || audioFile) &&
+                      !isStarted
                         ? "border-[#c230ff]"
                         : "border-gray-600"
                     }  px-2 py-1`}
