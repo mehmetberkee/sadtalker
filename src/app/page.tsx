@@ -620,9 +620,9 @@ export default function Home() {
           <Link href={"https://raygun.ai/"}>
             <img
               alt="logo"
-              src={"/raygunlogo.png"}
-              width={150}
-              height={150}
+              src={"/raygun_zap.png"}
+              width={220}
+              height={220}
               className="my-2"
             />
           </Link>
